@@ -11,7 +11,7 @@ export default class VisualisationSection extends Component {
 
   render() {
     return (
-      <FlexContainer column height={100}>
+      <FlexContainer column relative height={100}>
         <FlexItem basis={20}>
           <Internals />
         </FlexItem>
