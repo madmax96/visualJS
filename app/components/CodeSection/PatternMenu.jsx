@@ -1,7 +1,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { MyMenu } from '../../UI/components/MyMenu';
-import codes from '../../codes';
+import { codes } from '../../config';
 import CodeBox from './CodeBox';
 import { FlexItem } from '../../UI/Layout';
 

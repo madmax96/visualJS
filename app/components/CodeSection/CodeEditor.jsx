@@ -12,7 +12,7 @@ import ClearButton from '../../UI/components/ClearButton';
 import ResizeButton from '../../UI/components/ResizeButton';
 
 
-import { replaceLetConst, getPrototypeTree } from '../../utils';
+import { replaceLetConst } from '../../utils/utils';
 
 class CodeEditor extends React.Component {
   constructor(props) {
@@ -74,11 +74,7 @@ class CodeEditor extends React.Component {
       .filter(prop => !this.defaultGlobals.includes(prop));
 
     const prototypeMap = new Map();
-    newProps.forEach((prop) => {
-      prototypeMap.set(frame.contentWindow[prop],
-        frame.contentWindow.Object.getPrototypeOf(frame.contentWindow[prop]));
-      delete frame.contentWindow[prop];
-    });
+
     // const tree = getPrototypeTree(memory);
     this.props.visualise(prototypeMap);
   }

@@ -8,6 +8,11 @@ import {
 } from './UI/Layout';
 import VisualisationSection from './components/VisualisationSection/index';
 
+import { JS_INTERNALS_TO_VISUALISE } from './config';
+import createGraphFromObjects from './utils/graphFromObject';
+
+const internalsGraph = createGraphFromObjects(JS_INTERNALS_TO_VISUALISE.map(key => window[key]));
+console.log(internalsGraph);
 class App extends React.Component {
   constructor(props) {
     super(props);
@@ -42,6 +47,8 @@ class App extends React.Component {
             <CodeSection
               visualise={prototypeMap => this.visualise(prototypeMap)}
               onWidthChange={newWidth => this.changeWidth(newWidth)}
+              internalsGraph={internalsGraph}
+
             />
           </FlexItem>
           <FlexItem grow={1} shrink={1}>

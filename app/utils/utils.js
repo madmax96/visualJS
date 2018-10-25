@@ -24,11 +24,3 @@ export function replaceLetConst(currentCode) {
     return isInString ? match : 'var ';
   });
 }
-
-export function getPrototypeTree(memory) {
-  const propNames = Object.getOwnPropertyNames(memory);
-  propNames.forEach((property) => {
-    const typeOfProp = typeof memory[property];
-    // find prototype
-  });
-}
