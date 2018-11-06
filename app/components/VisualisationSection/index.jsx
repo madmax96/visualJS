@@ -1,6 +1,6 @@
 import React, { Component } from 'react';
 import StartButton from './StartButton';
-import { FlexContainer, FlexItem, Position } from '../../UI/Layout';
+import { FlexContainer, FlexItem } from '../../UI/Layout';
 import Internals from './Internals';
 
 export default class VisualisationSection extends Component {
@@ -16,9 +16,9 @@ export default class VisualisationSection extends Component {
           <Internals />
         </FlexItem>
         <FlexItem basis={80} relative>
-          <Position absoluteCenter>
+          <FlexItem absoluteCenter>
             <StartButton />
-          </Position>
+          </FlexItem>
         </FlexItem>
       </FlexContainer>
     );

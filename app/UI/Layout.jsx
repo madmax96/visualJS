@@ -3,6 +3,17 @@ import styled from 'styled-components';
 export const Common = styled.div`
   height:${props => (props.height ? `${props.height}%` : 'auto')};
   width:${props => (props.width ? `${props.width}%` : 'auto')};
+  ${(props) => {
+    if (props.absoluteCenter) {
+      props.top = '50%';
+      props.left = '50%';
+      return 'transform:translate(-50%,-50%)';
+    }
+  }};
+  top:${props => props.top};
+  left:${props => props.left};
+  right:${props => props.right};
+  bottom:${props => props.bottom};
   position:${(props) => {
     if (props.absolute || props.absoluteCenter) return 'absolute';
     if (props.relative) return 'relative';
@@ -41,19 +52,4 @@ export const FlexItemContainer = styled(FlexContainer)`
     flex-grow:${props => props.grow || 0};
     flex-shrink:${props => props.shrink || 0};
     flex-basis:${props => (props.basis === 'auto' ? 'auto' : `${props.basis || 0}%`)};
-`;
-
-export const Position = styled(Common)`
-  ${(props) => {
-    if (props.absoluteCenter) {
-      props.top = '50%';
-      props.left = '50%';
-      return 'transform:translate(-50%,-50%)';
-    }
-  }};
-  top:${props => props.top};
-  left:${props => props.left};
-  right:${props => props.right};
-  bottom:${props => props.bottom};
-  
 `;

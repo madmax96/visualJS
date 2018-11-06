@@ -5,7 +5,7 @@ import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import 'codemirror/mode/javascript/javascript';
 import {
-  FlexContainer, Position, Common,
+  FlexContainer,
 } from '../../UI/Layout';
 import ToggleMenuButton from '../../UI/components/ToggleMenuButton';
 import ClearButton from '../../UI/components/ClearButton';
@@ -21,7 +21,6 @@ class CodeEditor extends React.Component {
     };
     // Iframe creates new global object which will be used as a sandbox to execude code in it
     this.codeTextarea = React.createRef();
-    this.frame = React.createRef();
     this.executeCode = this.executeCode.bind(this);
     this.setMousemoveHandler = this.setMousemoveHandler.bind(this);
     this.editor = null;
@@ -33,8 +32,6 @@ class CodeEditor extends React.Component {
       theme: 'material',
       mode: 'javascript',
     });
-    const frame = this.frame.current;
-    this.defaultGlobals = Object.getOwnPropertyNames(frame.contentWindow);
   }
 
   shouldComponentUpdate(nextProps) {
@@ -79,22 +76,16 @@ class CodeEditor extends React.Component {
     this.props.visualise(prototypeMap);
   }
 
-
   render() {
     return (
       <FlexContainer height={100} relative>
-        <Common dNone>
-          <iframe src="" frameBorder="0" ref={this.frame} title="iframe" />
-        </Common>
-        <Position absolute right="1%" top="1%" zIndex={1000}>
-          <FlexContainer>
-            <ClearButton onClick={() => this.props.setEditorCode(' ')} />
-            <ToggleMenuButton onClick={this.props.toggleMenu} />
-          </FlexContainer>
-        </Position>
-        <Position absolute right={0} top="50%" zIndex={1000}>
+        <FlexContainer absolute right="1%" top="1%" zIndex={1000}>
+          <ClearButton onClick={() => this.props.setEditorCode(' ')} />
+          <ToggleMenuButton onClick={this.props.toggleMenu} />
+        </FlexContainer>
+        <FlexContainer absolute right={0} top="50%" zIndex={1000}>
           <ResizeButton onMouseDown={this.setMousemoveHandler} />
-        </Position>
+        </FlexContainer>
         <textarea name="code" ref={this.codeTextarea} />
       </FlexContainer>
     );

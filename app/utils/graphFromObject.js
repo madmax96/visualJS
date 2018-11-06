@@ -1,16 +1,15 @@
 import { BY_VALUE } from '../config';
 /**
  *
- * @param {object} object
- * @param {array} V // All objects that appears in memory are vertices of graph
- * @param {array} prototypeEdges // Edges that represents prototype connection of 2 objects
- * @param {array} referenceEdges // Edges that represents reference connection of 2 objects
+ * @param {array} objects
+ * @param {array} V // Vertices of graph -> All objects that appears in memory
  *
  */
 
 export default function createGraphFromObjects(objects, V = []) {
   const prototypeEdges = [];
   const referenceEdges = [];
+
   function traverseObject(object) {
     if (V.includes(object)) return;
     V.push(object);
