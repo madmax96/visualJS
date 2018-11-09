@@ -1,4 +1,4 @@
-export function replaceLetConst(currentCode) {
+export default function replaceLetConst(currentCode) {
   let lastMatch;
   const stringIndexes = [];
   // if let or const are inside a string then they shoudn't be replaced

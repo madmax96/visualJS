@@ -10,29 +10,36 @@ import VisualisationSection from './components/VisualisationSection/index';
 
 import { JS_INTERNALS_TO_VISUALISE } from './config';
 import createGraphFromObjects from './utils/graphFromObject';
+import replaceLetConst from './utils/replaceLetConst';
 
 class App extends React.Component {
   constructor(props) {
     super(props);
     this.state = {
       visualising: false,
+      error: false,
+      code: '',
     };
     this.section = React.createRef();
     this.frame = React.createRef();
     this.visualise = this.visualise.bind(this);
     this.toogleEditor = this.toogleEditor.bind(this);
     this.changeWidth = this.changeWidth.bind(this);
+    this.setCode = this.setCode.bind(this);
+    this.visualise = this.visualise.bind(this);
+    this.defaultGlobals = null;
   }
 
   componentDidMount() {
     const global = this.frame.current.contentWindow;
-    const internalsGraph = createGraphFromObjects(JS_INTERNALS_TO_VISUALISE.map(key => global[key]));
+    this.defaultGlobals = Object.getOwnPropertyNames(global);
+    const internalsGraph = createGraphFromObjects(JS_INTERNALS_TO_VISUALISE
+      .map(key => global[key]));
     console.log(internalsGraph);
   }
 
-  visualise(prototypeMap) {
-    console.log(prototypeMap);
-    this.setState({ visualising: true });
+  setCode(code) {
+    this.setState({ code });
   }
 
   toogleEditor() {
@@ -43,8 +50,35 @@ class App extends React.Component {
     this.section.current.style['flex-basis'] = `${newWidth}%`;
   }
 
+  visualise() {
+    this.setState({ visualising: true });
+    const frame = this.frame.current;
+    try {
+      // first evaluation to check for errors
+      frame.contentWindow.eval(this.state.code);
+    } catch (e) {
+      return this.setState({ visualising: false, error: e.message });
+    }
+    /* replace all let and const declarations with var
+     var declarations are available on global object */
+
+    const codeToExecute = replaceLetConst(this.state.code);
+    frame.contentWindow.eval(codeToExecute);
+    const newGlobals = Object.getOwnPropertyNames(frame.contentWindow);
+    const newProps = newGlobals
+      .filter(prop => !this.defaultGlobals.includes(prop));
+
+    const memoryGraph = createGraphFromObjects(newProps
+      .map(key => frame.contentWindow[key]));
+
+    console.log(memoryGraph);
+    newProps.forEach((key) => {
+      delete frame.contentWindow[key];
+    });
+  }
+
   render() {
-    const { visualising } = this.state;
+    const { visualising, error, code } = this.state;
     return (
       <AppContainer>
         <Common dNone>
@@ -55,10 +89,12 @@ class App extends React.Component {
             <CodeSection
               visualise={prototypeMap => this.visualise(prototypeMap)}
               onWidthChange={newWidth => this.changeWidth(newWidth)}
+              onCodeChange={code => this.setCode(code)}
+              code={code}
             />
           </FlexItem>
           <FlexItem grow={1} shrink={1}>
-            <VisualisationSection />
+            <VisualisationSection visualise={this.visualise} />
           </FlexItem>
         </FlexContainer>
       </AppContainer>

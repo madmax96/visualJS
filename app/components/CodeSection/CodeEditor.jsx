@@ -11,17 +11,11 @@ import ToggleMenuButton from '../../UI/components/ToggleMenuButton';
 import ClearButton from '../../UI/components/ClearButton';
 import ResizeButton from '../../UI/components/ResizeButton';
 
-
-import { replaceLetConst } from '../../utils/utils';
-
 class CodeEditor extends React.Component {
   constructor(props) {
     super(props);
-    this.state = {
-    };
     // Iframe creates new global object which will be used as a sandbox to execude code in it
     this.codeTextarea = React.createRef();
-    this.executeCode = this.executeCode.bind(this);
     this.setMousemoveHandler = this.setMousemoveHandler.bind(this);
     this.editor = null;
   }
@@ -32,17 +26,21 @@ class CodeEditor extends React.Component {
       theme: 'material',
       mode: 'javascript',
     });
+    this.editor.on('change', () => {
+      this.props.onCodeChange(this.editor.getValue());
+    });
   }
 
   shouldComponentUpdate(nextProps) {
-    if (nextProps.code !== undefined) this.editor.setValue(nextProps.code);
+    if (this.editor.getValue() !== nextProps.code) {
+      this.editor.setValue(nextProps.code);
+    }
     return true;
   }
 
   setMousemoveHandler(e) {
     window.onmousemove = (e) => {
       const newWidth = Math.min(Math.round((e.clientX / window.innerWidth) * 100), 50);
-      // alert(newWidth);
       this.props.onWidthChange(newWidth);
     };
     window.onmouseup = function onmouseup() {
@@ -52,35 +50,11 @@ class CodeEditor extends React.Component {
     e.preventDefault(); // to prevent selection of text
   }
 
-  executeCode() {
-    const frame = this.frame.current;
-    try {
-      // first evaluation to check for errors
-      frame.contentWindow.eval(this.editor.getValue());
-    } catch (e) {
-      return this.props.onCodeError(e.message);
-    }
-    /* replace all let and const declarations with var
-     var declarations are available on global object */
-
-    const codeToExecute = replaceLetConst(this.editor.getValue());
-    frame.contentWindow.eval(codeToExecute);
-
-    const newGlobals = Object.getOwnPropertyNames(frame.contentWindow);
-    const newProps = newGlobals
-      .filter(prop => !this.defaultGlobals.includes(prop));
-
-    const prototypeMap = new Map();
-
-    // const tree = getPrototypeTree(memory);
-    this.props.visualise(prototypeMap);
-  }
-
   render() {
     return (
       <FlexContainer height={100} relative>
         <FlexContainer absolute right="1%" top="1%" zIndex={1000}>
-          <ClearButton onClick={() => this.props.setEditorCode(' ')} />
+          <ClearButton onClick={() => this.props.onCodeChange(' ')} />
           <ToggleMenuButton onClick={this.props.toggleMenu} />
         </FlexContainer>
         <FlexContainer absolute right={0} top="50%" zIndex={1000}>
@@ -96,7 +70,8 @@ CodeEditor.propTypes = {
   visualise: PropTypes.func.isRequired,
   onCodeError: PropTypes.func.isRequired,
   toggleMenu: PropTypes.func.isRequired,
-  setEditorCode: PropTypes.func.isRequired,
+  onWidthChange: PropTypes.func.isRequired,
+  onCodeChange: PropTypes.func.isRequired,
   code: PropTypes.string,
 };
 
