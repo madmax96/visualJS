@@ -14,6 +14,9 @@ export const Common = styled.div`
   left:${props => props.left};
   right:${props => props.right};
   bottom:${props => props.bottom};
+  overflow:${props => props.overflow || 'hidden'};
+  overflow-x:${props => props.overflow_x || 'hidden'};
+  overflow-y:${props => props.overflow_y || 'hidden'};
   position:${(props) => {
     if (props.absolute || props.absoluteCenter) return 'absolute';
     if (props.relative) return 'relative';
@@ -39,14 +42,16 @@ export const FlexContainer = styled(Common)`
     }
     return props.reverse ? 'row-reverse' : 'row';
   }};
-    flex-wrap:${props => (props.wrap ? 'wrap' : 'no-wrap')};
-    overflow:'hidden';
+    flex-wrap:${props => (props.flex_wrap ? 'wrap' : 'no-wrap')};
+    justify-content: ${props => props.justify_content};
+    align-items: ${props => props.align_items};
+
 `;
+
 export const FlexItem = styled(Common)`
     flex-grow:${props => props.grow || 0};
     flex-shrink:${props => props.shrink || 0};
     flex-basis:${props => (props.basis === 'auto' ? 'auto' : `${props.basis || 0}%`)};
-    overflow:hidden;
 `;
 export const FlexItemContainer = styled(FlexContainer)`
     flex-grow:${props => props.grow || 0};

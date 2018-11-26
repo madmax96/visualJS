@@ -67,8 +67,6 @@ class CodeEditor extends React.Component {
 }
 
 CodeEditor.propTypes = {
-  visualise: PropTypes.func.isRequired,
-  onCodeError: PropTypes.func.isRequired,
   toggleMenu: PropTypes.func.isRequired,
   onWidthChange: PropTypes.func.isRequired,
   onCodeChange: PropTypes.func.isRequired,
