@@ -1,4 +1,6 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import {
   Dot, KeyValue, Function, Obj, Array,
 } from '../../../UI/components/ObjectVisualisation';
@@ -16,20 +18,49 @@ export default class ObjectNode extends React.Component {
     super(props);
     this.referenceDot = React.createRef();
     this.prototypeDot = React.createRef();
+    this.drawPrototypeLine = this.drawPrototypeLine.bind(this);
   }
 
   componentDidMount() {
-    const { x, y } = this.prototypeDot.current.getBoundingClientRect();
-    this.props.object.$$x = x;
-    this.props.object.$$y = y;
+    /**
+     * refactor to avoid direct mutation(use symbol or find way to use hash table)
+     * for reference edges: -  use array of refs for keys on object
+     *                      -  and don't forget reference dot for whole object
+     *implement shrink and expand
+     *show only currently visible objects
+     */
+    const {
+      offsetTop: y, offsetLeft: x, clientWidth, clientHeight,
+    } = this.prototypeDot.current;
+    this.props.object.$$x = x + clientWidth / 2;
+    this.props.object.$$y = y + clientHeight / 2;
+  }
+
+  drawPrototypeLine() {
+    const { object } = this.props;
+    const objectProto = Object.getPrototypeOf(this.props.object);
+
+    const { $$x: x1, $$y: y1 } = object;
+    const { $$x: x2, $$y: y2 } = objectProto;
+
+    const newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); // Create a path in SVG's namespace
+    newLine.setAttribute('x1', x1);
+    newLine.setAttribute('y1', y1);
+    newLine.setAttribute('x2', x2);
+    newLine.setAttribute('y2', y2);
+    newLine.style.stroke = '#FAC863'; // Set stroke colour
+    newLine.style.strokeWidth = '2px';
+    this.props.drawLine(newLine);
   }
 
   render() {
-    const { object } = this.props;
+    const { object, drawPrototypeLine } = this.props;
+
+
     const keys = Object.getOwnPropertyNames(object);
     const pairs = [];
-    keys.forEach((key, i) => {
-      if (!isValidProp(key)) return;
+    keys.filter(key => isValidProp(key)).forEach((key, i) => {
+      if (i > 3) return;
       pairs.push(
         <KeyValue key={i}>
           <KeyValue.Key>
@@ -48,9 +79,14 @@ export default class ObjectNode extends React.Component {
         {objectTypes[type](pairs)}
         <FlexContainer justify_content="center">
           <Dot reference mr={5} innerRef={this.referenceDot} />
-          <Dot innerRef={this.prototypeDot} />
+          <Dot innerRef={this.prototypeDot} onClick={this.drawPrototypeLine} />
         </FlexContainer>
       </div>
     );
   }
 }
+
+ObjectNode.propTypes = {
+  object: PropTypes.any.isRequired,
+  drawLine: PropTypes.func.isRequired,
+};

@@ -1,15 +1,23 @@
 import React from 'react';
+import PropTypes from 'prop-types';
+
 import { isReferenceType } from '../../utils/validation';
 import { Dot } from '../../UI/components/ObjectVisualisation';
 import Primitive from './ValueTypes/PrimitiveTypes';
 
-import Var from '../../UI/components/Var';
+import VarUI from '../../UI/components/Var';
 
-export default ({ value, name }) => (
-  <Var>
-    <Var.Name>{name}</Var.Name>
-    <Var.Value>
+const Var = ({ value, name }) => (
+  <VarUI>
+    <VarUI.Name>{name}</VarUI.Name>
+    <VarUI.Value>
       {isReferenceType(value)
         ? <Dot reference /> : <Primitive value={value} /> }
-    </Var.Value>
-  </Var>);
+    </VarUI.Value>
+  </VarUI>);
+
+Var.propTypes = {
+  name: PropTypes.string.isRequired,
+  value: PropTypes.any.isRequired,
+};
+export default Var;

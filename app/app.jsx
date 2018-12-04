@@ -104,9 +104,9 @@ class App extends React.Component {
           <iframe src="" frameBorder="0" ref={this.frame} title="iframe" />
         </Common>
         <FlexContainer height={100}>
-          <FlexItem basis={50} innerRef={this.section}>
+          <FlexItem basis={10} innerRef={this.section}>
             <CodeSection
-              visualise={prototypeMap => this.visualise(prototypeMap)}
+              visualise={this.visualise}
               onWidthChange={newWidth => this.changeWidth(newWidth)}
               onCodeChange={code => this.setCode(code)}
               code={code}
@@ -114,7 +114,6 @@ class App extends React.Component {
           </FlexItem>
           <FlexItem grow={1} shrink={1}>
             <VisualisationSection
-              visualise={this.visualise}
               internalsGraph={internalsGraph}
               memoryGraph={memoryGraph}
               globals={globals}

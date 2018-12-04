@@ -158,3 +158,8 @@ export const Array = props => (
     </PairsWrapper>
     <ArrayRightBracket />
   </ObjectContainer>);
+
+export const SvgContainer = styled.svg`
+  width:100%;
+  position:absolute;
+`;

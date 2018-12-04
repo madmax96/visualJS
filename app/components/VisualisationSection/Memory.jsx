@@ -1,14 +1,15 @@
 import React from 'react';
 import PropTypes from 'prop-types';
+import { generate } from 'shortid';
 import { FlexContainer, FlexItem } from '../../UI/Layout';
 import ObjectNode from './ValueTypes/ObjectNode';
 import { isValidProp, isReferenceType } from '../../utils/validation';
 import getLastSymbolValue from '../../utils/getLastSymbolValue';
 import Var from './Var';
 
-const Memory = ({ memoryGraph, globals }) => {
+const Memory = ({ memoryGraph, globals, drawLine }) => {
   if (!memoryGraph) return null;
-  const { V, referenceEdges, prototypeEdges } = memoryGraph;
+  const { V } = memoryGraph;
   const visualised = [];
   // group objects by number of references they have
   const grouped = V.reduce((accumulated, object) => {
@@ -33,10 +34,10 @@ const Memory = ({ memoryGraph, globals }) => {
     const objectsToTraverse = objects || singleReferenceObjects;
     if (!objects) {
       drawn.push(
-        <FlexContainer column>
+        <FlexContainer column key={generate()}>
           {singleReferenceObjects.map(object => (
-            <FlexItem basis="auto">
-              <ObjectNode object={object} />
+            <FlexItem key={generate()} basis="auto">
+              <ObjectNode object={object} drawLine={drawLine} />
             </FlexItem>
           ))}
         </FlexContainer>,
@@ -59,8 +60,8 @@ const Memory = ({ memoryGraph, globals }) => {
       });
       if (objects) {
         drawn.push(
-          <FlexItem basis="auto">
-            <ObjectNode object={object} />
+          <FlexItem basis="auto" key={generate()}>
+            <ObjectNode object={object} drawLine={drawLine} />
           </FlexItem>,
         );
         if (singleReferenceNext.length) {
@@ -76,10 +77,10 @@ const Memory = ({ memoryGraph, globals }) => {
   }
 
   Object.keys(grouped).map(num => +num).sort((a, b) => b - a)
-    .forEach((num, i) => {
+    .forEach((num) => {
       const objectsAtLevel = grouped[num];
       visualised.push(
-        <FlexContainer key={i} justify_content="space-evenly" align_items="center" flex_wrap>
+        <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
           {drawObjectsAtLevel(objectsAtLevel)}
         </FlexContainer>,
       );
@@ -87,7 +88,7 @@ const Memory = ({ memoryGraph, globals }) => {
 
   if (oneReferenceObjects.length) {
     visualised.push(
-      <FlexContainer key="asdasd" justify_content="space-evenly" align_items="center" flex_wrap>
+      <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
         {drawObjectsAtLevel(oneReferenceObjects)}
       </FlexContainer>,
     );
@@ -95,9 +96,9 @@ const Memory = ({ memoryGraph, globals }) => {
   const globalVarNames = Object.getOwnPropertyNames(globals);
   // show variables
   visualised.push(
-    <FlexContainer key="adsfgh" justify_content="space-evenly" align_items="center" flex_wrap>
+    <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
       {globalVarNames.filter(varName => !(typeof globals[varName] === 'function' && globals[varName].name === varName))
-        .map(varName => <Var name={varName} value={globals[varName]} />)}
+        .map(varName => <Var key={generate()} name={varName} value={globals[varName]} />)}
     </FlexContainer>,
   );
   return (
@@ -108,11 +109,12 @@ const Memory = ({ memoryGraph, globals }) => {
 };
 
 Memory.propTypes = {
-  MemoryGraph: PropTypes.exact({
+  memoryGraph: PropTypes.exact({
     V: PropTypes.arrayOf(PropTypes.any),
     referenceEdges: PropTypes.arrayOf(PropTypes.instanceOf(Map)),
     prototypeEdges: PropTypes.arrayOf(PropTypes.instanceOf(Map)),
   }),
+  globals: PropTypes.objectOf(PropTypes.any),
 };
 
 export default Memory;

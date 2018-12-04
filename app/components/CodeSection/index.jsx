@@ -19,6 +19,9 @@ export default class CodeSection extends React.Component {
 
   render() {
     const { menuOpened } = this.state;
+    const {
+      onWidthChange, onCodeChange, code, visualise,
+    } = this.props;
     return (
       <FlexContainer column height={100}>
         <FlexItem basis={menuOpened ? 15 : 0}>
@@ -29,10 +32,11 @@ export default class CodeSection extends React.Component {
         </FlexItem>
         <FlexItem grow={1}>
           <CodeEditor
-            code={this.props.code}
+            code={code}
             toggleMenu={this.toggleMenu}
-            onWidthChange={this.props.onWidthChange}
-            onCodeChange={this.props.onCodeChange}
+            onWidthChange={onWidthChange}
+            onCodeChange={onCodeChange}
+            visualise={visualise}
           />
         </FlexItem>
       </FlexContainer>
@@ -43,5 +47,6 @@ export default class CodeSection extends React.Component {
 CodeSection.propTypes = {
   onWidthChange: PropTypes.func.isRequired,
   onCodeChange: PropTypes.func.isRequired,
+  visualise: PropTypes.func.isRequired,
   code: PropTypes.string.isRequired,
 };

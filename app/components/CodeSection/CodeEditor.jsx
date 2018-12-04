@@ -10,6 +10,7 @@ import {
 import ToggleMenuButton from '../../UI/components/ToggleMenuButton';
 import ClearButton from '../../UI/components/ClearButton';
 import ResizeButton from '../../UI/components/ResizeButton';
+import StartButton from '../../UI/components/StartButton';
 
 class CodeEditor extends React.Component {
   constructor(props) {
@@ -51,11 +52,14 @@ class CodeEditor extends React.Component {
   }
 
   render() {
+    const { onCodeChange, toggleMenu, visualise } = this.props;
     return (
       <FlexContainer height={100} relative>
         <FlexContainer absolute right="1%" top="1%" zIndex={1000}>
-          <ClearButton onClick={() => this.props.onCodeChange(' ')} />
-          <ToggleMenuButton onClick={this.props.toggleMenu} />
+          <ClearButton onClick={() => onCodeChange(' ')} />
+          <ToggleMenuButton onClick={toggleMenu} />
+          <StartButton onClick={visualise} />
+
         </FlexContainer>
         <FlexContainer absolute right={0} top="50%" zIndex={1000}>
           <ResizeButton onMouseDown={this.setMousemoveHandler} />
@@ -70,6 +74,7 @@ CodeEditor.propTypes = {
   toggleMenu: PropTypes.func.isRequired,
   onWidthChange: PropTypes.func.isRequired,
   onCodeChange: PropTypes.func.isRequired,
+  visualise: PropTypes.func.isRequired,
   code: PropTypes.string,
 };
 
