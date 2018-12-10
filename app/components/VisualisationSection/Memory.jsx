@@ -13,7 +13,7 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
   const visualised = [];
   // group objects by number of references they have
   const grouped = V.reduce((accumulated, object) => {
-    const numOfReferences = getLastSymbolValue(object);
+    const { numOfReferences } = getLastSymbolValue(object);
     if (accumulated[numOfReferences]) {
       accumulated[numOfReferences].push(object);
     } else {
@@ -48,7 +48,7 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
       propNames.forEach((prop) => {
         if (!isValidProp(prop)) return;
         if (isReferenceType(object[prop])) {
-          const numOfReferences = getLastSymbolValue(object[prop]);
+          const { numOfReferences } = getLastSymbolValue(object[prop]);
           if (numOfReferences == 1) {
             singleReferenceNext.push(object[prop]);
             const index = oneReferenceObjects.indexOf(object[prop]);

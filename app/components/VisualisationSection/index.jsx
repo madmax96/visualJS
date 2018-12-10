@@ -22,7 +22,10 @@ export default class VisualisationSection extends Component {
   }
 
   componentDidUpdate() {
-    const { prototypeEdges: internalsPrototypeEdges } = this.props.internalsGraph;
+    const {
+      prototypeEdges: internalsPrototypeEdges,
+      referenceEdges: internalsReferenceEdges,
+    } = this.props.internalsGraph;
 
     const { height: internalsHeight } = this.internalsSection.current.getBoundingClientRect();
     const { height: scriptMemoryHeight } = this.scriptMemorySection.current.getBoundingClientRect();
@@ -43,7 +46,12 @@ export default class VisualisationSection extends Component {
       newLine.style.strokeWidth = '2px';
       this.svgContainer.current.appendChild(newLine);
     };
-
+    internalsReferenceEdges.forEach((edge) => {
+      // ???
+      const objectPropMap = edge.keys().next().value;
+      const key = objectPropMap.keys().next();
+      console.log(key);
+    });
     // internalsPrototypeEdges.forEach(drawPrototypeLine);
 
     // if (this.props.memoryGraph) {

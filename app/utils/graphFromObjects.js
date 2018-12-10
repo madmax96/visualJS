@@ -14,21 +14,19 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
     const symbols = Object.getOwnPropertySymbols(object);
 
     if (V.includes(object) || (alreadyVisualised && alreadyVisualised.includes(object))) {
-      const counterSymbol = symbols[symbols.length - 1];
-      object[counterSymbol]++;
+      const objectInfo = symbols[symbols.length - 1];
+      object[objectInfo].numOfReferences++;
       return;
     }
-
-
-    let hasCounterSymbol = false;
+    let hasObjectInfo = false;
     for (let i = 0; i < symbols.length; i++) {
       const symbol = symbols[i];
-      if (symbol.toString() === 'Symbol(numOfReferences)') {
-        hasCounterSymbol = true;
+      if (symbol.toString() === 'Symbol(objectInfo)') {
+        hasObjectInfo = true;
         break;
       }
     }
-    if (!hasCounterSymbol) {
+    if (!hasObjectInfo) {
       /*
       The following mutation on object is used
       to track how many references specific object has toward it
@@ -36,7 +34,7 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
 
       Symbol properties are not enumerable and can be used to add 'hidden' properties on objects
     */
-      object[Symbol('numOfReferences')] = 1;
+      object[Symbol('objectInfo')] = { numOfReferences: 1 };
     }
 
     V.push(object);
