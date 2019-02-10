@@ -3,17 +3,47 @@ import PropTypes from 'prop-types';
 import { generate } from 'shortid';
 import { FlexContainer, FlexItem } from '../../UI/Layout';
 import ObjectNode from './ValueTypes/ObjectNode';
-import { isValidProp, isReferenceType } from '../../utils/validation';
+import { isValidProp, isReferenceType, pickValidProps } from '../../utils/validation';
 import getLastSymbolValue from '../../utils/getLastSymbolValue';
+
 import Var from './Var';
 
-const Memory = ({ memoryGraph, globals, drawLine }) => {
+function recursivelyHideObjects(object, props) {
+  for (const prop of props) {
+    if (isValidProp(object, prop) && isReferenceType(object[prop])) {
+      const objectInfo = getLastSymbolValue(object[prop]);
+      if (objectInfo.numOfReferences === 1) {
+        objectInfo.isDisplayed = false;
+        recursivelyHideObjects(object[prop], Object.getOwnPropertyNames(object[prop]));
+      }
+    }
+  }
+}
+const Memory = ({
+  memoryGraph, globals, drawSingleLine, addVarLine, redraw,
+}) => {
   if (!memoryGraph) return null;
   const { V } = memoryGraph;
   const visualised = [];
-  // group objects by number of references they have
+
+  // group objects by number of references they have,and limit them to display only first 4 props
   const grouped = V.reduce((accumulated, object) => {
-    const { numOfReferences } = getLastSymbolValue(object);
+    const objectInfo = getLastSymbolValue(object);
+    const { numOfReferences, isShrinked, isDisplayed } = objectInfo;
+    if (isDisplayed) {
+      const allObjectProps = Object.getOwnPropertyNames(object);
+      const displayedProps = pickValidProps(object, isShrinked ? 4 : null);
+      const notDisplayedProps = allObjectProps.filter(prop => !displayedProps.includes(prop));
+
+      recursivelyHideObjects(object, notDisplayedProps);
+      for (const prop of displayedProps) {
+        if (isValidProp(object, prop) && isReferenceType(object[prop])) {
+          const objectInfo = getLastSymbolValue(object[prop]);
+          objectInfo.isDisplayed = true;
+        }
+      }
+    }
+
     if (accumulated[numOfReferences]) {
       accumulated[numOfReferences].push(object);
     } else {
@@ -35,18 +65,27 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
     if (!objects) {
       drawn.push(
         <FlexContainer column key={generate()}>
-          {singleReferenceObjects.map(object => (
-            <FlexItem key={generate()} basis="auto">
-              <ObjectNode object={object} drawLine={drawLine} />
-            </FlexItem>
-          ))}
+          {singleReferenceObjects.map((object) => {
+            const objectInfo = getLastSymbolValue(object);
+            return (
+              <FlexItem key={generate()} basis="auto" dNone={!objectInfo.isDisplayed}>
+                <ObjectNode
+                  object={object}
+                  drawSingleLine={drawSingleLine}
+                  isShrinked={objectInfo.isShrinked}
+                  redraw={redraw}
+
+                />
+              </FlexItem>
+            );
+          })}
         </FlexContainer>,
       );
     }
     objectsToTraverse.forEach((object) => {
       const propNames = Object.getOwnPropertyNames(object);
       propNames.forEach((prop) => {
-        if (!isValidProp(prop)) return;
+        if (!isValidProp(object, prop)) return;
         if (isReferenceType(object[prop])) {
           const { numOfReferences } = getLastSymbolValue(object[prop]);
           if (numOfReferences == 1) {
@@ -59,9 +98,16 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
         }
       });
       if (objects) {
+        const objectInfo = getLastSymbolValue(object);
         drawn.push(
-          <FlexItem basis="auto" key={generate()}>
-            <ObjectNode object={object} drawLine={drawLine} />
+          <FlexItem basis="auto" key={generate()} dNone={!objectInfo.isDisplayed}>
+            <ObjectNode
+              object={object}
+              drawSingleLine={drawSingleLine}
+              isShrinked={objectInfo.isShrinked}
+              redraw={redraw}
+
+            />
           </FlexItem>,
         );
         if (singleReferenceNext.length) {
@@ -98,7 +144,14 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
   visualised.push(
     <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
       {globalVarNames.filter(varName => !(typeof globals[varName] === 'function' && globals[varName].name === varName))
-        .map(varName => <Var key={generate()} name={varName} value={globals[varName]} />)}
+        .map(varName => (
+          <Var
+            key={generate()}
+            addVarLine={addVarLine}
+            name={varName}
+            value={globals[varName]}
+          />
+        ))}
     </FlexContainer>,
   );
   return (
@@ -111,10 +164,11 @@ const Memory = ({ memoryGraph, globals, drawLine }) => {
 Memory.propTypes = {
   memoryGraph: PropTypes.exact({
     V: PropTypes.arrayOf(PropTypes.any),
-    referenceEdges: PropTypes.arrayOf(PropTypes.instanceOf(Map)),
-    prototypeEdges: PropTypes.arrayOf(PropTypes.instanceOf(Map)),
+    referenceEdges: PropTypes.instanceOf(Map),
   }),
   globals: PropTypes.objectOf(PropTypes.any),
+  drawSingleLine: PropTypes.func,
+  addVarLine: PropTypes.func,
 };
 
 export default Memory;

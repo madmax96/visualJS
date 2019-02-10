@@ -1,6 +1,11 @@
 import React from 'react';
 import styled from 'styled-components';
 
+export const ObjectNodeUI = styled.div`
+  /* background: white;
+  z-index:2; */
+`;
+
 export const Dot = styled.div`
     width:8px;
     height:8px;
@@ -148,7 +153,8 @@ export const Obj = props => (
       {props.children}
     </PairsWrapper>
     <ObjectRightBracket />
-  </ObjectContainer>);
+  </ObjectContainer>
+);
 
 export const Array = props => (
   <ObjectContainer>
@@ -157,7 +163,8 @@ export const Array = props => (
       {props.children}
     </PairsWrapper>
     <ArrayRightBracket />
-  </ObjectContainer>);
+  </ObjectContainer>
+);
 
 export const SvgContainer = styled.svg`
   width:100%;

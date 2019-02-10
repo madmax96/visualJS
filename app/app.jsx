@@ -22,7 +22,6 @@ class App extends React.Component {
       internalsGraph: null,
       memoryGraph: null,
       globals: null,
-      internalGlobals: {},
     };
     this.section = React.createRef();
     this.frame = React.createRef();
@@ -31,6 +30,8 @@ class App extends React.Component {
     this.changeWidth = this.changeWidth.bind(this);
     this.setCode = this.setCode.bind(this);
     this.visualise = this.visualise.bind(this);
+    this.redraw = this.redraw.bind(this);
+
     this.defaultGlobals = null;
   }
 
@@ -39,8 +40,8 @@ class App extends React.Component {
     this.defaultGlobals = Object.getOwnPropertyNames(global);
     const internalsGraph = createGraphFromObjects(JS_INTERNALS_TO_VISUALISE
       .map(key => global[key]));
-    const internalGlobals = { Math: global.Math };
-    this.setState({ internalsGraph, internalGlobals });
+    this.internalGlobals = { Math: global.Math };
+    this.setState({ internalsGraph });
   }
 
   setCode(code) {
@@ -94,9 +95,13 @@ class App extends React.Component {
     });
   }
 
+  redraw() {
+    this.forceUpdate();
+  }
+
   render() {
     const {
-      error, code, internalsGraph, internalGlobals, memoryGraph, globals,
+      error, code, internalsGraph, memoryGraph, globals,
     } = this.state;
     return (
       <AppContainer>
@@ -104,7 +109,7 @@ class App extends React.Component {
           <iframe src="" frameBorder="0" ref={this.frame} title="iframe" />
         </Common>
         <FlexContainer height={100}>
-          <FlexItem basis={10} innerRef={this.section}>
+          <FlexItem basis={10} ref={this.section}>
             <CodeSection
               visualise={this.visualise}
               onWidthChange={newWidth => this.changeWidth(newWidth)}
@@ -117,7 +122,8 @@ class App extends React.Component {
               internalsGraph={internalsGraph}
               memoryGraph={memoryGraph}
               globals={globals}
-              internalGlobals={internalGlobals}
+              internalGlobals={this.internalGlobals}
+              redraw={this.redraw}
             />
           </FlexItem>
         </FlexContainer>

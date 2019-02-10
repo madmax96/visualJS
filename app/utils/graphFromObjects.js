@@ -7,8 +7,7 @@ import { isValidProp, isReferenceType } from './validation';
  */
 
 export default function createGraphFromObjects(objects, alreadyVisualised) {
-  const prototypeEdges = [];
-  const referenceEdges = [];
+  const referenceEdges = new Map();
   const V = [];
   function traverseObject(object) {
     const symbols = Object.getOwnPropertySymbols(object);
@@ -34,28 +33,27 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
 
       Symbol properties are not enumerable and can be used to add 'hidden' properties on objects
     */
-      object[Symbol('objectInfo')] = { numOfReferences: 1 };
+      object[Symbol('objectInfo')] = { numOfReferences: 1, isDisplayed: true, isShrinked: true };
     }
 
     V.push(object);
     const prototype = Object.getPrototypeOf(object);
     if (prototype !== null) {
-      prototypeEdges.push(new Map([[object, prototype]]));
       traverseObject(prototype);
     }
 
-    const keys = Object.getOwnPropertyNames(object);
-    keys.forEach((key) => {
-      if (!isValidProp(key)) return;
+    const props = Object.getOwnPropertyNames(object);
+    props.forEach((prop) => {
+      if (!isValidProp(object, prop)) return;
       let value;
       try {
-        value = object[key]; // vidi za size na Set objektu
+        value = object[prop]; // vidi za size na Set objektu
       } catch (e) {
-        return;
+        return console.log(e);
       }
       if (isReferenceType(value)) {
-        const objectKeyMap = new Map([[object, key]]);
-        referenceEdges.push(new Map([[objectKeyMap, value]]));
+        const objectPropMap = [object, prop];
+        referenceEdges.set(objectPropMap, value);
         traverseObject(value);
       }
     });
@@ -63,6 +61,6 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
   objects.forEach(object => traverseObject(object));
 
   return {
-    V, prototypeEdges, referenceEdges,
+    V, referenceEdges,
   };
 }

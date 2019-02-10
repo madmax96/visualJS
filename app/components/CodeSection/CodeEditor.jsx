@@ -28,7 +28,7 @@ class CodeEditor extends React.Component {
       mode: 'javascript',
     });
     this.editor.on('change', () => {
-      this.props.onCodeChange(this.editor.getValue());
+      this.props.onCodeChange(this.editor.getValue()); // must change this
     });
   }
 

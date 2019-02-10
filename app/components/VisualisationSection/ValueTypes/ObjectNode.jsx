@@ -1,11 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import {
-  Dot, KeyValue, Function, Obj, Array,
+  Dot, KeyValue, Function, Obj, Array, ObjectNodeUI,
 } from '../../../UI/components/ObjectVisualisation';
 import { FlexContainer } from '../../../UI/Layout';
-import { isReferenceType, isValidProp } from '../../../utils/validation';
+import { isReferenceType, pickValidProps } from '../../../utils/validation';
 import getLastSymbolValue from '../../../utils/getLastSymbolValue';
+import createSVGLine from '../../../utils/createSVGLine';
 
 import Primitive from './PrimitiveTypes';
 
@@ -20,19 +21,10 @@ export default class ObjectNode extends React.Component {
     this.referenceDot = React.createRef();
     this.prototypeDot = React.createRef();
     this.drawPrototypeLine = this.drawPrototypeLine.bind(this);
-    this.validKeys = Object.getOwnPropertyNames(props.object).filter(isValidProp);
-    this.referenceProps = {};
-    this.validKeys
-      .filter(key => isReferenceType(props.object[key])).forEach((key) => {
-        this.referenceProps[key] = React.createRef();
-      });
+    this.shrinkExpand = this.shrinkExpand.bind(this);
   }
 
   componentDidMount() {
-    /**
-     *implement shrink and expand
-     *show only currently visible objects
-     */
     const {
       offsetTop: protoY, offsetLeft: protoX, clientWidth, clientHeight,
     } = this.prototypeDot.current;
@@ -41,6 +33,7 @@ export default class ObjectNode extends React.Component {
       x: protoX + clientWidth / 2,
       y: protoY + clientHeight / 2,
     };
+
 
     const {
       offsetTop: refY, offsetLeft: refX, clientWidth: refDotWidth, clientHeight: refDotHeight,
@@ -62,28 +55,45 @@ export default class ObjectNode extends React.Component {
     });
   }
 
+  componentWillUnmount() {
+    // alert('unmount'); // shiiiiit
+  }
+
   drawPrototypeLine() {
     const { object } = this.props;
     const objectProto = Object.getPrototypeOf(this.props.object);
+    const objectInfo = getLastSymbolValue(object);
+    const objectProtoInfo = getLastSymbolValue(objectProto);
 
-    const { $$x: x1, $$y: y1 } = object;
-    const { $$x: x2, $$y: y2 } = objectProto;
+    const dot1 = objectInfo.prototypeDot;
+    const dot2 = objectProtoInfo.prototypeDot;
+    if (dot1 && dot2) {
+      const line = createSVGLine(dot1, dot2, { stroke: 'red', strokeWidth: '2px' });
+      this.props.drawSingleLine(line);
+    }
+  }
 
-    const newLine = document.createElementNS('http://www.w3.org/2000/svg', 'line'); // Create a path in SVG's namespace
-    newLine.setAttribute('x1', x1);
-    newLine.setAttribute('y1', y1);
-    newLine.setAttribute('x2', x2);
-    newLine.setAttribute('y2', y2);
-    newLine.style.stroke = '#FAC863'; // Set stroke colour
-    newLine.style.strokeWidth = '2px';
-    this.props.drawLine(newLine);
+  shrinkExpand() {
+    const { object } = this.props;
+    const objectInfo = getLastSymbolValue(object);
+
+    objectInfo.isShrinked = !objectInfo.isShrinked;
+    this.props.redraw();
   }
 
   render() {
-    const { object, drawPrototypeLine } = this.props;
+    const { object, isShrinked } = this.props;
     const pairs = [];
+
+    this.validKeys = pickValidProps(object, isShrinked ? 4 : null);
+
+    this.referenceProps = {};
+    this.validKeys
+      .filter(key => isReferenceType(object[key])).forEach((key) => {
+        this.referenceProps[key] = React.createRef();
+      });
+
     this.validKeys.forEach((key, i) => {
-      // if (i > 3) return;
       pairs.push(
         <KeyValue key={i}>
           <KeyValue.Key>
@@ -92,25 +102,26 @@ export default class ObjectNode extends React.Component {
           </KeyValue.Key>
           {!isReferenceType(object[key])
             ? <Primitive value={object[key]} />
-            : <Dot innerRef={this.referenceProps[key]} reference />}
+            : <Dot ref={this.referenceProps[key]} reference />}
         </KeyValue>,
       );
     });
     let type = typeof object;
     if (window.Array.isArray(object)) type = 'array';
     return (
-      <div>
+      <ObjectNodeUI onClick={this.shrinkExpand}>
         {objectTypes[type](pairs)}
         <FlexContainer justify_content="center">
-          <Dot reference mr={5} innerRef={this.referenceDot} />
-          <Dot innerRef={this.prototypeDot} onClick={this.drawPrototypeLine} />
+          <Dot reference mr={5} ref={this.referenceDot} />
+          <Dot ref={this.prototypeDot} onClick={this.drawPrototypeLine} />
         </FlexContainer>
-      </div>
+      </ObjectNodeUI>
     );
   }
 }
 
 ObjectNode.propTypes = {
   object: PropTypes.any.isRequired,
-  drawLine: PropTypes.func.isRequired,
+  drawSingleLine: PropTypes.func.isRequired,
+  isShrinked: PropTypes.bool,
 };
