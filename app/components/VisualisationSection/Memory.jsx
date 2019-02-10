@@ -169,6 +169,8 @@ Memory.propTypes = {
   globals: PropTypes.objectOf(PropTypes.any),
   drawSingleLine: PropTypes.func,
   addVarLine: PropTypes.func,
+  redraw: PropTypes.func,
+
 };
 
 export default Memory;
