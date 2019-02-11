@@ -18,6 +18,8 @@ class CodeEditor extends React.Component {
     // Iframe creates new global object which will be used as a sandbox to execude code in it
     this.codeTextarea = React.createRef();
     this.setMousemoveHandler = this.setMousemoveHandler.bind(this);
+    this.startVisualisation = this.startVisualisation.bind(this);
+
     this.editor = null;
   }
 
@@ -28,15 +30,17 @@ class CodeEditor extends React.Component {
       mode: 'javascript',
     });
     this.editor.on('change', () => {
-      this.props.onCodeChange(this.editor.getValue()); // must change this
+      localStorage.setItem('currentCode', this.editor.getValue());
     });
   }
 
-  shouldComponentUpdate(nextProps) {
-    if (this.editor.getValue() !== nextProps.code) {
-      this.editor.setValue(nextProps.code);
-    }
+  shouldComponentUpdate() {
+    this.editor.setValue(localStorage.getItem('currentCode'));
     return true;
+  }
+
+  componentWillUnmount() {
+    localStorage.setItem('currentCode', ' ');
   }
 
   setMousemoveHandler(e) {
@@ -51,14 +55,18 @@ class CodeEditor extends React.Component {
     e.preventDefault(); // to prevent selection of text
   }
 
+  startVisualisation() {
+    this.props.visualise();
+  }
+
   render() {
-    const { onCodeChange, toggleMenu, visualise } = this.props;
+    const { toggleMenu } = this.props;
     return (
       <FlexContainer height={100} relative>
         <FlexContainer absolute right="1%" top="1%" zIndex={1000}>
-          <ClearButton onClick={() => onCodeChange(' ')} />
+          <ClearButton onClick={() => this.editor.setValue(' ')} />
           <ToggleMenuButton onClick={toggleMenu} />
-          <StartButton onClick={visualise} />
+          <StartButton onClick={this.startVisualisation} />
 
         </FlexContainer>
         <FlexContainer absolute right={0} top="50%" zIndex={1000}>
@@ -73,9 +81,7 @@ class CodeEditor extends React.Component {
 CodeEditor.propTypes = {
   toggleMenu: PropTypes.func.isRequired,
   onWidthChange: PropTypes.func.isRequired,
-  onCodeChange: PropTypes.func.isRequired,
   visualise: PropTypes.func.isRequired,
-  code: PropTypes.string,
 };
 
 export default CodeEditor;

@@ -27,12 +27,14 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
     }
     if (!hasObjectInfo) {
       /*
+      This should not be here. Function should be pure and not mutate.!!!
       The following mutation on object is used
-      to track how many references specific object has toward it
+      to track how many references (including prototype chain) specific object has toward it
       This will be used for drawing purposes so that objects with more references appear above
 
       Symbol properties are not enumerable and can be used to add 'hidden' properties on objects
     */
+
       object[Symbol('objectInfo')] = { numOfReferences: 1, isDisplayed: true, isShrinked: true };
     }
 
@@ -45,12 +47,8 @@ export default function createGraphFromObjects(objects, alreadyVisualised) {
     const props = Object.getOwnPropertyNames(object);
     props.forEach((prop) => {
       if (!isValidProp(object, prop)) return;
-      let value;
-      try {
-        value = object[prop]; // vidi za size na Set objektu
-      } catch (e) {
-        return console.log(e);
-      }
+      const value = object[prop];
+
       if (isReferenceType(value)) {
         const objectPropMap = [object, prop];
         referenceEdges.set(objectPropMap, value);

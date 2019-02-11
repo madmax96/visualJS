@@ -4,7 +4,7 @@
   "description": "Something really interesting",
   "main": "index.js",
   "scripts": {
-    "serve": "parcel public/index.html"
+    "start": "parcel public/index.html"
   },
   "author": "madmax",
   "license": "ISC",

@@ -11,31 +11,36 @@ export default class CodeSection extends React.Component {
       menuOpened: false,
     };
     this.toggleMenu = this.toggleMenu.bind(this);
+    this.setEditorCode = this.setEditorCode.bind(this);
+  }
+
+  setEditorCode(code) {
+    localStorage.setItem('currentCode', code);
+    this.forceUpdate();
   }
 
   toggleMenu() {
     this.setState(prevState => ({ menuOpened: !prevState.menuOpened }));
   }
 
+
   render() {
     const { menuOpened } = this.state;
     const {
-      onWidthChange, onCodeChange, code, visualise,
+      onWidthChange, visualise,
     } = this.props;
     return (
       <FlexContainer column height={100}>
         <FlexItem basis={menuOpened ? 15 : 0}>
           <PatternMenu
             toggle={this.toggleMenu}
-            setEditorCode={this.props.onCodeChange}
+            setEditorCode={code => this.setEditorCode(code)}
           />
         </FlexItem>
         <FlexItem grow={1}>
           <CodeEditor
-            code={code}
             toggleMenu={this.toggleMenu}
             onWidthChange={onWidthChange}
-            onCodeChange={onCodeChange}
             visualise={visualise}
           />
         </FlexItem>
@@ -46,7 +51,5 @@ export default class CodeSection extends React.Component {
 
 CodeSection.propTypes = {
   onWidthChange: PropTypes.func.isRequired,
-  onCodeChange: PropTypes.func.isRequired,
   visualise: PropTypes.func.isRequired,
-  code: PropTypes.string.isRequired,
 };

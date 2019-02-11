@@ -34,7 +34,6 @@ export default class ObjectNode extends React.Component {
       y: protoY + clientHeight / 2,
     };
 
-
     const {
       offsetTop: refY, offsetLeft: refX, clientWidth: refDotWidth, clientHeight: refDotHeight,
     } = this.referenceDot.current;
@@ -78,6 +77,7 @@ export default class ObjectNode extends React.Component {
     const objectInfo = getLastSymbolValue(object);
 
     objectInfo.isShrinked = !objectInfo.isShrinked;
+    console.log(objectInfo);
     this.props.redraw();
   }
 

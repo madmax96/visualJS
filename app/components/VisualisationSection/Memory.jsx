@@ -27,6 +27,8 @@ const Memory = ({
   const visualised = [];
 
   // group objects by number of references they have,and limit them to display only first 4 props
+
+  // This should be in separate file !!!
   const grouped = V.reduce((accumulated, object) => {
     const objectInfo = getLastSymbolValue(object);
     const { numOfReferences, isShrinked, isDisplayed } = objectInfo;

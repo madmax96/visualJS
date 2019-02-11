@@ -13,9 +13,10 @@ import Memory from './Memory';
   *implement shrink --> DONE
   *show only currently visible objects -->DONE
   *implement expand on click and showing all objects -->DONE
-  *refactor --> make nicer structure, refactor architecture
+  *refactor code state management --> DONE
   *implement recursive hiding of objects (only if object have one reference):
     -Problem here is when nested object has reference to its parent, like prototype-constructor connection
+    - Another problem is when in boject 2 or more properties are references to the same object
   *implement redrawing on resize event
   *implement drag/drop
   *implement closure detection
@@ -79,11 +80,10 @@ export default class VisualisationSection extends Component {
       const [object, prop] = objectPropMap;
       const value = referenceMap.get(objectPropMap);
       const objectInfo = getLastSymbolValue(object);
-      // if (!objectInfo.isDisplayed) return;
-      const dot1 = objectInfo.referenceProps[prop];
       const valueObjectInfo = getLastSymbolValue(value);
+      const dot1 = objectInfo.referenceProps[prop];
       const dot2 = valueObjectInfo.refDot;
-      if (dot1 && dot2) {
+      if (objectInfo.isDisplayed && valueObjectInfo.isDisplayed && dot1 && dot2) {
         const line = createSVGLine(dot1, dot2, { stroke: '#FAC863', strokeWidth: '2px' });
         this.drawSingleLine(line);
       }
@@ -91,7 +91,7 @@ export default class VisualisationSection extends Component {
   }
 
   drawSingleLine(line) {
-    line && this.svgContainer.current.appendChild(line);
+    if (line) this.svgContainer.current.appendChild(line);
   }
 
   addVarLine(line) {

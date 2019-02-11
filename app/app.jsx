@@ -18,7 +18,6 @@ class App extends React.Component {
     super(props);
     this.state = {
       error: false,
-      code: '',
       internalsGraph: null,
       memoryGraph: null,
       globals: null,
@@ -28,7 +27,6 @@ class App extends React.Component {
     this.visualise = this.visualise.bind(this);
     this.toogleEditor = this.toogleEditor.bind(this);
     this.changeWidth = this.changeWidth.bind(this);
-    this.setCode = this.setCode.bind(this);
     this.visualise = this.visualise.bind(this);
     this.redraw = this.redraw.bind(this);
 
@@ -44,9 +42,6 @@ class App extends React.Component {
     this.setState({ internalsGraph });
   }
 
-  setCode(code) {
-    this.setState({ code });
-  }
 
   toogleEditor() {
     this.setState(({ isEditorShown }) => ({ isEditorShown: !isEditorShown }));
@@ -57,17 +52,18 @@ class App extends React.Component {
   }
 
   visualise() {
+    const code = localStorage.getItem('currentCode');
     const global = this.frame.current.contentWindow;
     try {
       // first evaluation to check for errors
-      global.eval(this.state.code);
+      global.eval(code);
     } catch (e) {
       return this.setState({ error: e.message });
     }
     /* replace all let and const declarations with var
      var declarations are available on global object */
 
-    const codeToExecute = replaceLetConst(this.state.code);
+    const codeToExecute = replaceLetConst(code);
     global.eval(codeToExecute);
     const newGlobals = Object.getOwnPropertyNames(global);
     const newProps = newGlobals
@@ -89,7 +85,9 @@ class App extends React.Component {
     });
     const memoryGraph = createGraphFromObjects(objects, internalsGraph.V);
 
-    this.setState({ memoryGraph, internalsGraph, globals });
+    this.setState({
+      memoryGraph, internalsGraph, globals, code,
+    });
     newProps.forEach((key) => {
       delete global[key];
     });
@@ -101,7 +99,7 @@ class App extends React.Component {
 
   render() {
     const {
-      error, code, internalsGraph, memoryGraph, globals,
+      error, internalsGraph, memoryGraph, globals,
     } = this.state;
     return (
       <AppContainer>
@@ -113,8 +111,6 @@ class App extends React.Component {
             <CodeSection
               visualise={this.visualise}
               onWidthChange={newWidth => this.changeWidth(newWidth)}
-              onCodeChange={code => this.setCode(code)}
-              code={code}
             />
           </FlexItem>
           <FlexItem grow={1} shrink={1}>
