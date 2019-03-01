@@ -1,8 +1,8 @@
 import styled from 'styled-components';
 
 export const Common = styled.div`
-  height:${props => (props.height ? `${props.height}%` : 'auto')};
-  width:${props => (props.width ? `${props.width}%` : 'auto')};
+  height:${props => (props.height ? `${props.height}` : 'auto')};
+  width:${props => (props.width ? `${props.width}` : 'auto')};
   ${(props) => {
     if (props.absoluteCenter) {
       props.top = '50%';
@@ -28,11 +28,6 @@ export const Common = styled.div`
     if (props.dBlock) return 'block';
     if (props.dNone) return 'none';
   }};
-`;
-export const AppContainer = styled.div`
-    position:relative;
-    height:100vh;
-    overflow:hidden;
 `;
 export const FlexContainer = styled(Common)`
     display:flex;

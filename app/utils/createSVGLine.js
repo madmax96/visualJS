@@ -9,7 +9,7 @@ export default (dot1, dot2, { stroke, strokeWidth }) => {
   line.setAttribute('y1', y);
   line.setAttribute('x2', x1);
   line.setAttribute('y2', y1);
-  line.style.stroke = stroke; // Set stroke colour
-  line.style.strokeWidth = strokeWidth;
+  line.style.stroke = 'rgba(0,0,0,.1)'; // Set stroke colour
+  line.style.strokeWidth = '1px';
   return line;
 };

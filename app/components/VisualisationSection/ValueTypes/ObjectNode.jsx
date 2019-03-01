@@ -20,8 +20,11 @@ export default class ObjectNode extends React.Component {
     super(props);
     this.referenceDot = React.createRef();
     this.prototypeDot = React.createRef();
+    this.moveObjectDot = React.createRef();
+    this.objectRef = React.createRef();
     this.drawPrototypeLine = this.drawPrototypeLine.bind(this);
     this.shrinkExpand = this.shrinkExpand.bind(this);
+    this.setMousemoveHandler = this.setMousemoveHandler.bind(this);
   }
 
   componentDidMount() {
@@ -54,8 +57,24 @@ export default class ObjectNode extends React.Component {
     });
   }
 
-  componentWillUnmount() {
-    // alert('unmount'); // shiiiiit
+  setMousemoveHandler(e) {
+    this.props.clearLines();
+    const { current: objectInDOM } = this.objectRef;
+    objectInDOM.style.position = 'absolute';
+    window.onmousemove = (e) => {
+      // const newWidth = Math.min(Math.round((e.clientX / window.innerWidth) * 100), 50);
+      // this.props.onWidthChange(newWidth);
+      objectInDOM.style.left = `${e.screenX}px`;
+      objectInDOM.style.top = `${e.screenY - objectInDOM.clientHeight}px`;
+      // console.log(e);
+    };
+    window.onmouseup = () => {
+      window.onmousemove = null;
+      window.onmouseup = null;
+      this.props.redraw();
+    };
+
+    e.preventDefault(); // to prevent selection of text
   }
 
   drawPrototypeLine() {
@@ -77,9 +96,9 @@ export default class ObjectNode extends React.Component {
     const objectInfo = getLastSymbolValue(object);
 
     objectInfo.isShrinked = !objectInfo.isShrinked;
-    console.log(objectInfo);
     this.props.redraw();
   }
+
 
   render() {
     const { object, isShrinked } = this.props;
@@ -109,13 +128,17 @@ export default class ObjectNode extends React.Component {
     let type = typeof object;
     if (window.Array.isArray(object)) type = 'array';
     return (
-      <ObjectNodeUI onClick={this.shrinkExpand}>
-        {objectTypes[type](pairs)}
+      <div ref={this.objectRef}>
+        <Dot ref={this.moveObjectDot} onMouseDown={this.setMousemoveHandler} />
+        <div onClick={this.shrinkExpand}>
+          {objectTypes[type](pairs)}
+        </div>
+
         <FlexContainer justify_content="center">
           <Dot reference mr={5} ref={this.referenceDot} />
           <Dot ref={this.prototypeDot} onClick={this.drawPrototypeLine} />
         </FlexContainer>
-      </ObjectNodeUI>
+      </div>
     );
   }
 }

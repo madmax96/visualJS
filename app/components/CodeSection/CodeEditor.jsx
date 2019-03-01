@@ -39,19 +39,19 @@ class CodeEditor extends React.Component {
     return true;
   }
 
-  componentWillUnmount() {
-    localStorage.setItem('currentCode', ' ');
-  }
-
   setMousemoveHandler(e) {
+    this.props.clearLines();
+
     window.onmousemove = (e) => {
       const newWidth = Math.min(Math.round((e.clientX / window.innerWidth) * 100), 50);
       this.props.onWidthChange(newWidth);
     };
-    window.onmouseup = function onmouseup() {
+    window.onmouseup = () => {
       window.onmousemove = null;
       window.onmouseup = null;
+      this.props.redraw();
     };
+
     e.preventDefault(); // to prevent selection of text
   }
 
@@ -60,17 +60,11 @@ class CodeEditor extends React.Component {
   }
 
   render() {
-    const { toggleMenu } = this.props;
     return (
-      <FlexContainer height={100} relative>
+      <FlexContainer height="100%" relative>
         <FlexContainer absolute right="1%" top="1%" zIndex={1000}>
           <ClearButton onClick={() => this.editor.setValue(' ')} />
-          <ToggleMenuButton onClick={toggleMenu} />
-          <StartButton onClick={this.startVisualisation} />
-
-        </FlexContainer>
-        <FlexContainer absolute right={0} top="50%" zIndex={1000}>
-          <ResizeButton onMouseDown={this.setMousemoveHandler} />
+          <ClearButton onClick={this.props.visualise} />
         </FlexContainer>
         <textarea name="code" ref={this.codeTextarea} />
       </FlexContainer>

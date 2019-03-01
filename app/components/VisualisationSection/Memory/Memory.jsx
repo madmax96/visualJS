@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { generate } from 'shortid';
-import { FlexContainer, FlexItem } from '../../UI/Layout';
-import ObjectNode from './ValueTypes/ObjectNode';
-import { isValidProp, isReferenceType, pickValidProps } from '../../utils/validation';
-import getLastSymbolValue from '../../utils/getLastSymbolValue';
+import { FlexContainer, FlexItem } from '../../../UI/Layout';
+import ObjectNode from '../ValueTypes/ObjectNode';
+import { isValidProp, isReferenceType, pickValidProps } from '../../../utils/validation';
+import getLastSymbolValue from '../../../utils/getLastSymbolValue';
 
-import Var from './Var';
+import Var from '../Var';
 
 function recursivelyHideObjects(object, props) {
   for (const prop of props) {
@@ -20,7 +20,7 @@ function recursivelyHideObjects(object, props) {
   }
 }
 const Memory = ({
-  memoryGraph, globals, drawSingleLine, addVarLine, redraw,
+  memoryGraph, globals, drawSingleLine, addVarLine, redraw, clearLines,
 }) => {
   if (!memoryGraph) return null;
   const { V } = memoryGraph;
@@ -76,7 +76,7 @@ const Memory = ({
                   drawSingleLine={drawSingleLine}
                   isShrinked={objectInfo.isShrinked}
                   redraw={redraw}
-
+                  clearLines={clearLines}
                 />
               </FlexItem>
             );
@@ -108,7 +108,7 @@ const Memory = ({
               drawSingleLine={drawSingleLine}
               isShrinked={objectInfo.isShrinked}
               redraw={redraw}
-
+              clearLines={clearLines}
             />
           </FlexItem>,
         );

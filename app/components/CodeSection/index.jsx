@@ -27,10 +27,10 @@ export default class CodeSection extends React.Component {
   render() {
     const { menuOpened } = this.state;
     const {
-      onWidthChange, visualise,
+      onWidthChange, visualise, redraw, clearLines,
     } = this.props;
     return (
-      <FlexContainer column height={100}>
+      <FlexContainer column height="100%">
         <FlexItem basis={menuOpened ? 15 : 0}>
           <PatternMenu
             toggle={this.toggleMenu}
@@ -42,6 +42,8 @@ export default class CodeSection extends React.Component {
             toggleMenu={this.toggleMenu}
             onWidthChange={onWidthChange}
             visualise={visualise}
+            redraw={redraw}
+            clearLines={clearLines}
           />
         </FlexItem>
       </FlexContainer>
