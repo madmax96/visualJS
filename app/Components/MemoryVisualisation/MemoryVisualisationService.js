@@ -1,6 +1,7 @@
 import { Validation } from '../../Shared/Services';
 
 const { isValidProp, isReferenceType } = Validation;
+
 /**
  * @param {Array} objects
  */
@@ -133,4 +134,87 @@ export function separateObjectsAndGlobalVariables(props, globalObject) {
     }
   });
   return { objects, variables };
+}
+
+function drawSingleLine(line, node) {
+  if (line) node.appendChild(line);
+}
+
+export function drawReferenceLines(referenceMap, objectsInfoMap, node) {
+  const refKeys = referenceMap.keys();
+  for (const objectPropMap of refKeys) {
+    const [object, prop] = objectPropMap;
+    const value = referenceMap.get(objectPropMap);
+    const objectInfo = objectsInfoMap.get(object);
+    const valueObjectInfo = objectsInfoMap.get(value);
+    const dot1 = objectInfo.referenceProps[prop];
+    const dot2 = valueObjectInfo.refDot;
+    if (dot1 && dot2) {
+      const line = createSVGLine(dot1, dot2, { stroke: '#FAC863', strokeWidth: '2px' });
+      drawSingleLine(line, node);
+    }
+  }
+}
+export function drawPrototypeLines(V, objectsInfoMap, node) {
+  V.forEach((object) => {
+    const objectProto = Object.getPrototypeOf(object);
+    if (!objectProto) return;
+    const objectInfo = objectsInfoMap.get(object);
+    const objectProtoInfo = objectsInfoMap.get(objectProto);
+
+    const dot1 = objectInfo.prototypeDot;
+    const dot2 = objectProtoInfo.prototypeDot;
+    if (dot1 && dot2) {
+      const line = createSVGLine(dot1, dot2, { stroke: 'red', strokeWidth: '2px' });
+      drawSingleLine(line, node);
+    }
+  });
+}
+export function groupObjectsByFrequency(V, objectsInfoMap) {
+  // group objects by number of references they have,and limit them to display only first 4 props
+  // This should be in separate file !!!
+  const grouped = V.reduce((accumulated, object) => {
+    const objectInfo = objectsInfoMap.get(object);
+    // const { numOfReferences, isShrinked, isDisplayed } = objectInfo;
+    // if (isDisplayed) {
+    //   const allObjectProps = Object.getOwnPropertyNames(object);
+    //   const displayedProps = pickValidProps(object, isShrinked ? 4 : null);
+    //   const notDisplayedProps = allObjectProps.filter(prop => !displayedProps.includes(prop));
+
+    //   recursivelyHideObjects(object, notDisplayedProps);
+    //   for (const prop of displayedProps) {
+    //     if (isValidProp(object, prop) && isReferenceType(object[prop])) {
+    //       const objectInfo = getLastSymbolValue(object[prop]);
+    //       objectInfo.isDisplayed = true;
+    //     }
+    //   }
+    // }
+    const { numOfReferences } = objectInfo;
+    if (accumulated[numOfReferences]) {
+      accumulated[numOfReferences].push(object);
+    } else {
+      accumulated[numOfReferences] = [object];
+    }
+    return accumulated;
+  }, {});
+
+  // i don't want to represent objects with only one reference all at one line
+  let oneReferenceObjects = [];
+  if (grouped[1]) {
+    oneReferenceObjects = grouped[1];
+    delete grouped[1];
+  }
+  return { grouped, oneReferenceObjects };
+}
+
+export function recursivelyHideObjects(object, props, objectsInfoMap) {
+  for (const prop of props) {
+    if (isValidProp(object, prop) && isReferenceType(object[prop])) {
+      const objectInfo = objectsInfoMap.get(object[prop]);
+      if (objectInfo.numOfReferences === 1) {
+        objectInfo.isDisplayed = false;
+        recursivelyHideObjects(object[prop], Object.getOwnPropertyNames(object[prop]));
+      }
+    }
+  }
 }
