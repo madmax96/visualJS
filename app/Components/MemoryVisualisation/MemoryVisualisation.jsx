@@ -10,7 +10,6 @@ import {
   createGraphFromObjects,
   separateObjectsAndGlobalVariables,
   removeAllDOMChildNodes,
-  createSVGLine,
   groupObjectsByFrequency,
   drawReferenceLines,
   drawPrototypeLines,
@@ -23,7 +22,6 @@ import ObjectNode from './ValueTypes/ObjectNode';
 import VariableBox from './VariableBox';
 
 const { isReferenceType, isValidProp } = Validation;
-
 
 const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, singleReferenceObjects,
   drawn = []) => {
@@ -83,7 +81,9 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
   return drawn;
 };
 
-
+/** TODO
+ *  Move drawing algorithm to Service and make it encapsulated, functional and independent
+ *  */
 const VisualisationSection = () => {
   const { code } = useContext(GlobalStateContext);
   const [memoryState, setMemoryState] = useState({

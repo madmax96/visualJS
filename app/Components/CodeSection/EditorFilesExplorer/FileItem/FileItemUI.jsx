@@ -1,33 +1,33 @@
 import React from 'react';
-import { withStyles } from '@material-ui/core/styles';
+import { styled } from '@material-ui/styles';
 import { FlexContainer } from '../../../../Shared/UIComponents/LayoutGrid/Layout';
 import JSLogo from '../../../../../public/img/jsSVG.svg';
 
-const styles = theme => ({
+const FileName = styled('span', ({ theme }) => ({
+  color: theme.secondary.main,
+  fontWeight: 'bold',
+}), { withTheme: true });
 
-  jsIcon: {
-    width: '20px',
-    height: '20px',
-    marginRight: '10px',
+const Container = styled(FlexContainer, ({ theme }) => ({
+  cursor: 'pointer',
+  padding: 4,
+  '&:hover': {
+    backgroundColor: theme.secondary.dark,
   },
-  fileName: {
-    color: theme.palette.secondary.main,
-    fontWeight: 'bold',
-  },
-  container: {
-    cursor: 'pointer',
-    padding: 4,
-    '&:hover': {
-      backgroundColor: theme.palette.secondary.dark,
-    },
-  },
+}), { withTheme: true });
+
+const JsLogo = styled('img', {
+  width: '20px',
+  height: '20px',
+  marginRight: '10px',
 });
-export default withStyles(styles)(({ classes, filename, ...otherProps }) => (
-  <FlexContainer {...otherProps} className={classes.container}>
-    <img src={JSLogo} alt="jsLogo" className={classes.jsIcon} />
-    <span className={classes.fileName}>
+
+export default (({ filename, ...otherProps }) => (
+  <Container {...otherProps}>
+    <JsLogo src={JSLogo} alt="jsLogo" />
+    <FileName>
       {filename}
-        .js
-    </span>
-  </FlexContainer>
+      .js
+    </FileName>
+  </Container>
 ));

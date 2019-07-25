@@ -1,7 +1,8 @@
 import { BY_VALUE } from '../../constants';
 
 export function isValidProp(object, prop) {
-  return !(typeof object === 'function' && (prop === 'arguments' || prop === 'callee' || prop === 'caller'));// these props are not accessible due to strict mode functions
+  // these props are not accessible due to strict mode functions
+  return !(typeof object === 'function' && (prop === 'arguments' || prop === 'callee' || prop === 'caller'));
 }
 
 export function isReferenceType(value) {

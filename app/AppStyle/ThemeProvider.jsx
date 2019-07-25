@@ -1,6 +1,7 @@
 import {
-  MuiThemeProvider, createMuiTheme,
-} from '@material-ui/core/styles';
+  ThemeProvider,
+} from '@material-ui/styles';
+import { createMuiTheme } from '@material-ui/core/styles';
 import React, { useContext } from 'react';
 import { GlobalStateContext } from '../GlobalStateProvider';
 
@@ -35,14 +36,13 @@ const themes = {
   },
 };
 
-
 export default ({ children }) => {
   const { theme } = useContext(GlobalStateContext);
   const currentTheme = createMuiTheme(themes[theme]);
 
   return (
-    <MuiThemeProvider theme={currentTheme}>
+    <ThemeProvider theme={currentTheme}>
       {children}
-    </MuiThemeProvider>
+    </ThemeProvider>
   );
 };
