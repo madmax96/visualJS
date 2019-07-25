@@ -39,7 +39,6 @@ const themes = {
 export default ({ children }) => {
   const { theme } = useContext(GlobalStateContext);
   const currentTheme = createMuiTheme(themes[theme]);
-
   return (
     <ThemeProvider theme={currentTheme}>
       {children}
