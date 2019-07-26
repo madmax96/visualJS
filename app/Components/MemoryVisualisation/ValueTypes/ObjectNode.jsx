@@ -1,6 +1,7 @@
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import Box from '@material-ui/core/Box';
+import ThumbUpRounded from '@material-ui/icons/ThumbUpRounded';
 import {
   KeyValue, Function, Obj, Array,
 } from './ObjectNodeUI';
@@ -26,7 +27,7 @@ const ObjectNode = (props) => {
   // this.shrinkExpand = this.shrinkExpand.bind(this);
   // this.setMousemoveHandler = this.setMousemoveHandler.bind(this);
   const referenceProps = {};
-  useEffect(() => {
+  const setDotsCoordinates = () => {
     const {
       offsetTop: protoY, offsetLeft: protoX, clientWidth, clientHeight,
     } = prototypeDot.current;
@@ -54,27 +55,45 @@ const ObjectNode = (props) => {
         y: y + clientHeight / 2,
       };
     });
-  });
+  };
 
-  // setMousemoveHandler(e) {
-  //   this.props.clearLines();
-  //   const { current: objectInDOM } = this.objectRef;
-  //   objectInDOM.style.position = 'absolute';
-  //   window.onmousemove = (e) => {
-  //     // const newWidth = Math.min(Math.round((e.clientX / window.innerWidth) * 100), 50);
-  //     // this.props.onWidthChange(newWidth);
-  //     objectInDOM.style.left = `${e.screenX}px`;
-  //     objectInDOM.style.top = `${e.screenY - objectInDOM.clientHeight}px`;
-  //     // console.log(e);
-  //   };
-  //   window.onmouseup = () => {
-  //     window.onmousemove = null;
-  //     window.onmouseup = null;
-  //     this.props.redraw();
-  //   };
+  useEffect(() => {
+    const { current: objectInDOM } = objectRef;
+    // const { offsetLeft: x, offsetTop: y } = objectInDOM;
+    // console.log(objectInDOM.getBoundingClientRect());
+    // objectInDOM.style.position = 'absolute';
+    // objectInDOM.style.left = `${Math.round(x)}px`;
+    // objectInDOM.style.top = `${Math.round(y)}px`;
+    props.addNode(objectInDOM);
+  }, []);
 
-  //   e.preventDefault(); // to prevent selection of text
-  // }
+  useEffect(setDotsCoordinates);
+
+  const removeDragHandler = () => {
+    window.onmousemove = null;
+    window.onmouseup = null;
+    // this.props.redraw();
+  };
+  const setDragHandler = (e) => {
+    e.preventDefault(); // to prevent selection of text
+    // this.props.clearLines();
+    const { current: objectInDOM } = objectRef;
+    let positionSet = false;
+    window.onmousemove = (e) => {
+      // const newWidth = Math.min(Math.round((e.clientX / window.innerWidth) * 100), 50);
+      // this.props.onWidthChange(newWidth);
+      if (!positionSet) {
+        positionSet = true;
+        objectInDOM.style.position = 'absolute';
+      }
+
+      objectInDOM.style.left = `${e.pageX}px`;
+      objectInDOM.style.top = `${e.pageY - 64 - 969}px`;
+      setDotsCoordinates();
+      props.drawConnectionLines && props.drawConnectionLines();
+    };
+    window.onmouseup = removeDragHandler;
+  };
 
   // drawPrototypeLine() {
   //   const { object } = this.props;
@@ -122,7 +141,11 @@ const ObjectNode = (props) => {
   if (window.Array.isArray(object)) type = 'array';
   return (
     <div ref={objectRef}>
-      <Dot ref={moveObjectDot} onMouseDown={() => {}} />
+      <ThumbUpRounded
+        ref={moveObjectDot}
+        onMouseDown={setDragHandler}
+        onMouseUp={removeDragHandler}
+      />
       <div onClick={() => {}}>
         {objectTypes[type](pairs)}
       </div>

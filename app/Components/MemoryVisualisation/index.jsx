@@ -1,5 +1,5 @@
 import React, {
-  useRef, useState, useContext, useEffect,
+  useRef, useState, useContext, useEffect, Fragment,
 } from 'react';
 import Box from '@material-ui/core/Box';
 import { generate } from 'shortid';
@@ -22,6 +22,8 @@ import ObjectNode from './ValueTypes/ObjectNode';
 import VariableBox from './VariableBox';
 
 const { isReferenceType, isValidProp } = Validation;
+let drawConnectionLines;
+const nodes = [];
 
 const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, singleReferenceObjects,
   drawn = []) => {
@@ -37,6 +39,8 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
               <ObjectNode
                 object={object}
                 objectInfo={objectInfo}
+                drawConnectionLines={drawConnectionLines}
+                addNode={node => nodes.push(node)}
               />
             </Box>
           );
@@ -50,7 +54,7 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
       if (!isValidProp(object, prop)) return;
       if (isReferenceType(object[prop])) {
         const { numOfReferences } = objectsInfoMap.get(object[prop]);
-        if (numOfReferences == 1) {
+        if (numOfReferences === 1) {
           singleReferenceNext.push(object[prop]);
           const index = oneReferenceObjects.indexOf(object[prop]);
           if (index > -1) {
@@ -66,6 +70,8 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
           <ObjectNode
             object={object}
             objectInfo={objectInfo}
+            drawConnectionLines={drawConnectionLines}
+            addNode={node => nodes.push(node)}
           />
         </Box>,
       );
@@ -138,17 +144,31 @@ const VisualisationSection = () => {
   const { globalVariables } = memoryState;
 
 
-  useEffect(() => {
-    const { height } = memoryContainerElement.current.getBoundingClientRect();
+  drawConnectionLines = () => {
     const SVGContainerNode = svgContainerElement.current;
-    SVGContainerNode.style.height = height;
-    // // remove all lines before drawing new ones
     removeAllDOMChildNodes(SVGContainerNode);
     if (V) {
       drawReferenceLines(referenceEdges, objectsInfoMap, SVGContainerNode);
       drawPrototypeLines(V, objectsInfoMap, SVGContainerNode);
     }
+  };
+
+  useEffect(() => {
+    const { height } = memoryContainerElement.current.getBoundingClientRect();
+    const SVGContainerNode = svgContainerElement.current;
+    SVGContainerNode.style.height = height;
+    drawConnectionLines();
+    nodes.forEach((node) => {
+      const { offsetLeft: x, offsetTop: y } = node;
+      node.style.left = `${Math.round(x)}px`;
+      node.style.top = `${Math.round(y)}px`;
+    });
+    nodes.forEach((node) => {
+      node.style.position = 'absolute';
+    });
+    // // remove all lines before drawing new ones
   });
+
 
   const visualised = [];
   if (V) {
@@ -192,7 +212,7 @@ const VisualisationSection = () => {
   }
 
   return (
-    <div>
+    <>
       <Box display="none">
         <iframe title="sandboxEnvElement" src="" ref={sandboxEnvElement} />
       </Box>
@@ -200,7 +220,7 @@ const VisualisationSection = () => {
         <SvgContainer ref={svgContainerElement} />
         {visualised}
       </Box>
-    </div>
+    </>
   );
 };
 
