@@ -1,18 +1,12 @@
 import React from 'react';
 import { styled } from '@material-ui/styles';
-import { FlexContainer } from '../../../../Shared/UIComponents/LayoutGrid/Layout';
+import Box from '@material-ui/core/Box';
 import JSLogo from '../../../../../public/img/jsSVG.svg';
 
-const FileName = styled('span')(({ theme }) => ({
-  color: theme.palette.secondary.main,
-  fontWeight: 'bold',
-}), { withTheme: true });
-
-const Container = styled(FlexContainer)(({ theme }) => ({
+const Container = styled(Box)(({ theme }) => ({
   cursor: 'pointer',
-  padding: 4,
   '&:hover': {
-    backgroundColor: theme.palette.secondary.dark,
+    backgroundColor: theme.palette.primary.light,
   },
 }), { withTheme: true });
 
@@ -23,11 +17,11 @@ const JsLogo = styled('img')({
 });
 
 export default (({ filename, ...otherProps }) => (
-  <Container {...otherProps}>
+  <Container display="flex" p={1} {...otherProps}>
     <JsLogo src={JSLogo} alt="jsLogo" />
-    <FileName>
+    <Box variant="span" color="secondary.main" fontWeight="fontWeightBold">
       {filename}
       .js
-    </FileName>
+    </Box>
   </Container>
 ));

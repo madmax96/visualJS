@@ -2,11 +2,10 @@ import React from 'react';
 import IconButton from '@material-ui/core/IconButton';
 import DeleteIcon from '@material-ui/icons/Delete';
 import PlayArrowIcon from '@material-ui/icons/PlayArrowSharp';
-import { FlexContainer } from '../../../Shared/UIComponents/LayoutGrid/Layout';
+import Box from '@material-ui/core/Box';
 
-
-export const LayoutContainer = ({ children }) => <FlexContainer height="100%" relative>{children}</FlexContainer>;
-export const ButtonsContainer = ({ children }) => <FlexContainer absolute right="1%" top="1%" zIndex={1000}>{children}</FlexContainer>;
+export const LayoutContainer = ({ children }) => <Box height="100%" position="relative">{children}</Box>;
+export const ButtonsContainer = ({ children }) => <Box position="absolute" right="1%" top="1%" zIndex={1000}>{children}</Box>;
 export const ClearEditorButton = props => (
   <IconButton {...props}>
     <DeleteIcon />

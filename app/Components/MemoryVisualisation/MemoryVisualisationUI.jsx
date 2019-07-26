@@ -3,6 +3,7 @@ import styled from 'styled-components';
 export const SvgContainer = styled.svg`
   width:100%;
   position:absolute;
+  z-index:-1;
 `;
 
 export const Dot = styled.div`

@@ -1,26 +1,24 @@
 import React, { useContext, Fragment } from 'react';
 import ReactDOM from 'react-dom';
-import 'normalize.css/normalize.css';
+import CssBaseline from '@material-ui/core/CssBaseline';
 import { StylesProvider } from '@material-ui/styles';
 
 import './AppStyle/index.scss';
 import {
   AppLogo, AppNavbar, ToggleThemeBtn, CodeEditorSectionLayout, VisualisationSectionLayout,
 } from './AppUI';
-import StyleThemeProvider from './AppStyle/StyleThemeProvider';
-import GlobalStateProvider, { GlobalStateContext } from './GlobalStateProvider';
+import ThemeProvider from './AppStyle/StyleThemeProvider';
+import GlobalStateProvider, { GlobalContext } from './GlobalContextProvider';
 import CodeSection from './Components/CodeSection';
 import MemoryVisualisation from './Components/MemoryVisualisation';
 
 const App = () => {
-  const { toggleTheme } = useContext(GlobalStateContext);
+  const { toggleTheme } = useContext(GlobalContext);
   return (
     <Fragment>
       <AppNavbar>
-        <Fragment>
-          <AppLogo />
-          <ToggleThemeBtn onClick={toggleTheme} />
-        </Fragment>
+        <AppLogo />
+        <ToggleThemeBtn onClick={toggleTheme} />
       </AppNavbar>
       <CodeEditorSectionLayout>
         <CodeSection />
@@ -34,10 +32,11 @@ const App = () => {
 
 ReactDOM.render(
   <StylesProvider injectFirst>
+    <CssBaseline />
     <GlobalStateProvider>
-      <StyleThemeProvider>
+      <ThemeProvider>
         <App />
-      </StyleThemeProvider>
+      </ThemeProvider>
     </GlobalStateProvider>
   </StylesProvider>,
   document.getElementById('react-app'),

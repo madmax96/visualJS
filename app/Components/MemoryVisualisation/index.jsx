@@ -1,10 +1,11 @@
 import React, {
   useRef, useState, useContext, useEffect,
 } from 'react';
+import Box from '@material-ui/core/Box';
 import { generate } from 'shortid';
 
 // import PropTypes from 'prop-types';
-import { GlobalStateContext } from '../../GlobalStateProvider';
+import { GlobalContext } from '../../GlobalContextProvider';
 import {
   replaceLetConst,
   createGraphFromObjects,
@@ -16,7 +17,6 @@ import {
 } from './MemoryVisualisationService';
 import { Validation } from '../../Shared/Services';
 import { JS_INTERNALS_TO_VISUALISE } from '../../constants';
-import { CommonUI, FlexContainer, FlexItem } from '../../Shared/UIComponents/LayoutGrid/Layout';
 import { SvgContainer } from './MemoryVisualisationUI';
 import ObjectNode from './ValueTypes/ObjectNode';
 import VariableBox from './VariableBox';
@@ -29,19 +29,19 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
   const objectsToTraverse = objects || singleReferenceObjects;
   if (!objects) {
     drawn.push(
-      <FlexContainer column key={generate()}>
+      <Box display="flex" flexDirection="column" key={generate()}>
         {singleReferenceObjects.map((object) => {
           const objectInfo = objectsInfoMap.get(object);
           return (
-            <FlexItem key={generate()} basis="auto">
+            <Box key={generate()} flexBasis="auto">
               <ObjectNode
                 object={object}
                 objectInfo={objectInfo}
               />
-            </FlexItem>
+            </Box>
           );
         })}
-      </FlexContainer>,
+      </Box>,
     );
   }
   objectsToTraverse.forEach((object) => {
@@ -62,12 +62,12 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
     if (objects) {
       const objectInfo = objectsInfoMap.get(object);
       drawn.push(
-        <FlexItem basis="auto" key={generate()}>
+        <Box flexBasis="auto" key={generate()}>
           <ObjectNode
             object={object}
             objectInfo={objectInfo}
           />
-        </FlexItem>,
+        </Box>,
       );
       if (singleReferenceNext.length) {
         drawObjectsAtLevel(null, objectsInfoMap, oneReferenceObjects, singleReferenceNext, drawn);
@@ -85,7 +85,7 @@ const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, single
  *  Move drawing algorithm to Service and make it encapsulated, functional and independent
  *  */
 const VisualisationSection = () => {
-  const { code } = useContext(GlobalStateContext);
+  const { code } = useContext(GlobalContext);
   const [memoryState, setMemoryState] = useState({
     internalObjects: null,
     memoryGraph: null,
@@ -158,17 +158,17 @@ const VisualisationSection = () => {
       .forEach((num) => {
         const objectsAtLevel = grouped[num];
         visualised.push(
-          <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
+          <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
             {drawObjectsAtLevel(objectsAtLevel, objectsInfoMap, oneReferenceObjects)}
-          </FlexContainer>,
+          </Box>,
         );
       });
 
     if (oneReferenceObjects.length) {
       visualised.push(
-        <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
+        <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
           {drawObjectsAtLevel(oneReferenceObjects, objectsInfoMap, oneReferenceObjects)}
-        </FlexContainer>,
+        </Box>,
       );
     }
   }
@@ -176,7 +176,7 @@ const VisualisationSection = () => {
     const globalVarNames = Object.getOwnPropertyNames(globalVariables);
     // show variables
     visualised.push(
-      <FlexContainer key={generate()} justify_content="space-evenly" align_items="center" flex_wrap>
+      <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
         {globalVarNames
           .map(varName => (
             <VariableBox
@@ -187,19 +187,19 @@ const VisualisationSection = () => {
               objectInfo={objectsInfoMap.get(globalVariables[varName])}
             />
           ))}
-      </FlexContainer>,
+      </Box>,
     );
   }
 
   return (
     <div>
-      <CommonUI dNone>
+      <Box display="none">
         <iframe title="sandboxEnvElement" src="" ref={sandboxEnvElement} />
-      </CommonUI>
-      <FlexContainer column relative ref={memoryContainerElement}>
+      </Box>
+      <Box display="flex" flexDirection="column" position="relative" ref={memoryContainerElement}>
         <SvgContainer ref={svgContainerElement} />
         {visualised}
-      </FlexContainer>
+      </Box>
     </div>
   );
 };

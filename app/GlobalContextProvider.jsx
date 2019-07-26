@@ -1,6 +1,6 @@
 import React, { createContext, useState } from 'react';
 
-export const GlobalStateContext = createContext();
+export const GlobalContext = createContext();
 const defaultContextState = {
   code: '',
   theme: 'light',
@@ -15,8 +15,8 @@ export default ({ children }) => {
   const toggleTheme = () => setContextState({ ...contextState, theme: contextState.theme === 'light' ? 'dark' : 'light' });
 
   return (
-    <GlobalStateContext.Provider value={{ ...contextState, setCode, toggleTheme }}>
+    <GlobalContext.Provider value={{ ...contextState, setCode, toggleTheme }}>
       {children}
-    </GlobalStateContext.Provider>
+    </GlobalContext.Provider>
   );
 };

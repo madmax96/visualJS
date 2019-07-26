@@ -114,6 +114,7 @@ V7.309c0-4.037-3.271-7.309-7.309-7.309H82.829c-4.037,0-7.31,3.272-7.31,7.309s3.2
 );
 
 const ObjectContainer = styled.div`
+    z-index:100;
     &:hover{
        svg{
         width:13px;

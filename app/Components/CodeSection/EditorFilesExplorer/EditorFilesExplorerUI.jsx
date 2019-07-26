@@ -1,4 +1,4 @@
 import React from 'react';
-import { FlexContainer } from '../../../Shared/UIComponents/LayoutGrid/Layout';
+import Box from '@material-ui/core/Box';
 
-export const LayoutContainer = ({ children }) => <FlexContainer column>{children}</FlexContainer>;
+export default ({ children }) => <Box display="flex" flexDirection="column">{children}</Box>;

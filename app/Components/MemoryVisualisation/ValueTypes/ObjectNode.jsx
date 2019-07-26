@@ -1,10 +1,10 @@
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import Box from '@material-ui/core/Box';
 import {
   KeyValue, Function, Obj, Array,
 } from './ObjectNodeUI';
 import { Dot } from '../MemoryVisualisationUI';
-import { FlexContainer } from '../../../Shared/UIComponents/LayoutGrid/Layout';
 import { Validation } from '../../../Shared/Services';
 import { pickValidProps } from '../MemoryVisualisationService';
 
@@ -127,10 +127,10 @@ const ObjectNode = (props) => {
         {objectTypes[type](pairs)}
       </div>
 
-      <FlexContainer justify_content="center">
+      <Box display="flex" justifyContent="center">
         <Dot reference mr={5} ref={referenceDot} />
         <Dot ref={prototypeDot} onClick={() => {}} />
-      </FlexContainer>
+      </Box>
     </div>
   );
 };

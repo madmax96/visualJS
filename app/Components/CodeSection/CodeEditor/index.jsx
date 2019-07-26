@@ -6,7 +6,7 @@ import CodeMirror from 'codemirror';
 import 'codemirror/lib/codemirror.css';
 import 'codemirror/theme/material.css';
 import 'codemirror/mode/javascript/javascript';
-import { GlobalStateContext } from '../../../GlobalStateProvider';
+import { GlobalContext } from '../../../GlobalContextProvider';
 import {
   LayoutContainer, ButtonsContainer, VisualiseButton, ClearEditorButton,
 } from './CodeEditorUI';
@@ -15,7 +15,7 @@ import {
 const CodeEditor = ({ code, clearCode }) => {
   const codeTextarea = useRef();
   const [editor, setEditor] = useState(null);
-  const { setCode } = useContext(GlobalStateContext);
+  const { setCode } = useContext(GlobalContext);
   useEffect(() => {
     const CMEditor = CodeMirror.fromTextArea(codeTextarea.current, {
       lineNumbers: true,
