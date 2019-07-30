@@ -14,7 +14,7 @@ export function createGraphFromObjects(objects) {
     if (objectInfo) {
       return objectInfo.numOfReferences++;
     }
-    objectsInfoMap.set(object, { numOfReferences: 1, visibility: 'Collapsed' });
+    objectsInfoMap.set(object, { numOfReferences: 1 });
     V.push(object);
     const prototype = Object.getPrototypeOf(object);
     if (prototype !== null) {
