@@ -7,11 +7,10 @@ import {
 } from './ObjectNodeUI';
 import { Dot } from '../MemoryVisualisationUI';
 import { Services } from '../../../Shared';
-import { pickValidProps } from '../MemoryVisualisationService';
 
 import Primitive from './PrimitiveTypes';
 
-const { isReferenceType } = Services.Validation;
+const { isReferenceType, isValidProp } = Services.Validation;
 
 const objectTypes = {
   function: keyValuePairs => <Function>{keyValuePairs}</Function>,
@@ -24,7 +23,7 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
   const moveObjectDot = useRef();
   const objectRef = useRef();
 
-  const validKeys = pickValidProps(object, null);
+  const validKeys = Object.getOwnPropertyNames(object).filter(prop => isValidProp(object, prop));
   const referenceProps = validKeys
     .filter(key => isReferenceType(object[key]))
     .reduce((obj, key) => ({
