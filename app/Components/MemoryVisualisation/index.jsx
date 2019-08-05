@@ -2,24 +2,25 @@ import React, {
   useRef, useState, useContext, useEffect,
 } from 'react';
 import Box from '@material-ui/core/Box';
+import _partition from 'lodash/partition';
 import { generate } from 'shortid';
 
 // import PropTypes from 'prop-types';
 import { GlobalContext } from '../../GlobalContextProvider';
 import {
   replaceLetConst,
-  createGraphFromObjects,
-  separateObjectsAndGlobalVariables,
   groupObjectsByFrequency,
 } from './MemoryVisualisationService';
-import { Validation } from '../../Shared/Services';
+import { Services } from '../../Shared';
+
 import { JS_INTERNALS_TO_VISUALISE } from '../../constants';
 import { SvgContainer } from './MemoryVisualisationUI';
 import Line from './Line';
 import ObjectNode from './ValueTypes/ObjectNode';
 import VariableBox from './VariableBox';
 
-const { isReferenceType, isValidProp } = Validation;
+
+const { isReferenceType, isValidProp } = Services.Validation;
 const drawObjectsAtLevel = (objects, objectsInfoMap, oneReferenceObjects, singleReferenceObjects,
   drawn = []) => {
   let singleReferenceNext = [];
@@ -109,70 +110,68 @@ const VisualisationSection = () => {
       const newProps = newGlobalObjectProps
         .filter(prop => !globalObjectProps.includes(prop));
 
-      const {
-        objects,
-        variables: globalVariables,
-      } = separateObjectsAndGlobalVariables(newProps, sandboxEnv);
-      const {
-        objects: internalObjects,
-        variables: internalGlobalVariables,
-      } = separateObjectsAndGlobalVariables(JS_INTERNALS_TO_VISUALISE, sandboxEnv);
-      const memoryGraph = createGraphFromObjects([...internalObjects, ...objects]);
-      // restore sandbox
-      newProps.forEach((key) => {
-        delete sandboxEnv[key];
-      });
-      // setMemoryState({
-      //   memoryGraph, internalObjects, globalVariables, internalGlobalVariables,
-      // });
-      const { V, referenceEdges, objectsInfoMap } = memoryGraph;
-      if (V) {
-        const { grouped, oneReferenceObjects } = groupObjectsByFrequency(V, objectsInfoMap);
+      const [referenceTypes, valueTypes] = _partition(
+        [...JS_INTERNALS_TO_VISUALISE, ...newProps]
+          .map(prop => ({ envVariableName: prop, envVariableValue: sandboxEnv[prop] })),
+        ({ envVariableValue }) => isReferenceType(envVariableValue),
+      );
 
-        Object.keys(grouped)
-          .map(num => +num)
-          .sort((a, b) => b - a)
-          .forEach((num) => {
-            const objectsAtLevel = grouped[num];
-            visualisedObjects.push(
-              <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
-                {drawObjectsAtLevel(objectsAtLevel, objectsInfoMap, oneReferenceObjects)}
-              </Box>,
-            );
-          });
+      const objectsGroupedByFrequency = groupObjectsByFrequency(referenceTypes
+        .map(refType => refType.envVariableValue));
 
-        if (oneReferenceObjects.length) {
-          visualisedObjects.push(
-            <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
-              {drawObjectsAtLevel(oneReferenceObjects, objectsInfoMap, oneReferenceObjects)}
-            </Box>,
-          );
-        }
-      }
-      if (globalVariables) {
-        const globalVarNames = Object.getOwnPropertyNames(globalVariables);
-        // show variables
-        visualisedObjects.push(
-          <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
-            {globalVarNames
-              .map(varName => (
-                <VariableBox
-                  key={generate()}
-                   // addVarLine={addVarLine}
-                  name={varName}
-                  value={globalVariables[varName]}
-                  objectInfo={objectsInfoMap.get(globalVariables[varName])}
-                />
-              ))}
-          </Box>,
-        );
-      }
-      setErrorState('');
+      console.log(objectsGroupedByFrequency);
+
+      setVisualisedObjects(referenceTypes.map(object => (
+        <Box key={generate()} flexBasis="auto">
+          <ObjectNode
+            object={object.envVariableValue}
+            onRenderToDOM={() => {}}
+          />
+        </Box>
+      )));
+      // Object.keys(grouped)
+      //   .map(num => +num)
+      //   .sort((a, b) => b - a)
+      //   .forEach((num) => {
+      //     const objectsAtLevel = grouped[num];
+      //     visualisedObjects.push(
+      //       <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
+      //         {drawObjectsAtLevel(objectsAtLevel, objectsInfoMap, oneReferenceObjects)}
+      //       </Box>,
+      //     );
+      //   });
+
+      // if (oneReferenceObjects.length) {
+      //   visualisedObjects.push(
+      //     <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
+      //       {drawObjectsAtLevel(oneReferenceObjects, objectsInfoMap, oneReferenceObjects)}
+      //     </Box>,
+      //   );
+      // }
+      // if (globalVariables) {
+      //   const globalVarNames = Object.getOwnPropertyNames(globalVariables);
+      //   // show variables
+      //   visualisedObjects.push(
+      //     <Box display="flex" key={generate()} justifyContent="space-evenly" alignItems="center" flexWrap="wrap">
+      //       {globalVarNames
+      //         .map(varName => (
+      //           <VariableBox
+      //             key={generate()}
+      //              // addVarLine={addVarLine}
+      //             name={varName}
+      //             value={globalVariables[varName]}
+      //             objectInfo={objectsInfoMap.get(globalVariables[varName])}
+      //           />
+      //         ))}
+      //     </Box>,
+      //   );
+      // }
+      // setErrorState('');
     }
   }, [code]);
 
 
-  drawConnectionLines = () => {
+  const drawConnectionLines = () => {
     if (V) {
       const localLines = [];
       const refKeys = referenceEdges.keys();
@@ -193,22 +192,22 @@ const VisualisationSection = () => {
     }
   };
 
-  useEffect(() => {
-    const { height } = memoryContainerElement.current.getBoundingClientRect();
-    const SVGContainerNode = svgContainerElement.current;
-    SVGContainerNode.style.height = height;
+  // useEffect(() => {
+  //   const { height } = memoryContainerElement.current.getBoundingClientRect();
+  //   const SVGContainerNode = svgContainerElement.current;
+  //   SVGContainerNode.style.height = height;
 
-    setLines(drawConnectionLines());
-    // nodes.forEach((node) => {
-    //   const { offsetLeft: x, offsetTop: y } = node;
-    //   node.style.left = `${Math.round(x)}px`;
-    //   node.style.top = `${Math.round(y)}px`;
-    // });
-    // nodes.forEach((node) => {
-    //   node.style.position = 'absolute';
-    // });
-    // // remove all lines before drawing new ones
-  }, [code, memoryState.memoryGraph]);
+  //   setLines(drawConnectionLines());
+  //   // nodes.forEach((node) => {
+  //   //   const { offsetLeft: x, offsetTop: y } = node;
+  //   //   node.style.left = `${Math.round(x)}px`;
+  //   //   node.style.top = `${Math.round(y)}px`;
+  //   // });
+  //   // nodes.forEach((node) => {
+  //   //   node.style.position = 'absolute';
+  //   // });
+  //   // // remove all lines before drawing new ones
+  // }, [code, memoryState.memoryGraph]);
 
   return (
     <>
@@ -216,9 +215,9 @@ const VisualisationSection = () => {
         <iframe title="sandboxEnvElement" src="" ref={sandboxEnvElement} />
       </Box>
       <Box display="flex" flexDirection="column" position="relative" ref={memoryContainerElement}>
-        <SvgContainer ref={svgContainerElement}>
+        {/* <SvgContainer ref={svgContainerElement}>
           {lines}
-        </SvgContainer>
+        </SvgContainer> */}
         {visualisedObjects}
       </Box>
     </>

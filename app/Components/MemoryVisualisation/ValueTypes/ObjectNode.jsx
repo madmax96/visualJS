@@ -6,12 +6,12 @@ import {
   KeyValue, Function, Obj, Array,
 } from './ObjectNodeUI';
 import { Dot } from '../MemoryVisualisationUI';
-import { Validation } from '../../../Shared/Services';
+import { Services } from '../../../Shared';
 import { pickValidProps } from '../MemoryVisualisationService';
 
 import Primitive from './PrimitiveTypes';
 
-const { isReferenceType } = Validation;
+const { isReferenceType } = Services.Validation;
 
 const objectTypes = {
   function: keyValuePairs => <Function>{keyValuePairs}</Function>,

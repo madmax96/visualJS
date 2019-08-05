@@ -1,6 +1,6 @@
-import { Validation } from '../../Shared/Services';
+import { Services } from '../../Shared';
 
-const { isValidProp, isReferenceType } = Validation;
+const { isValidProp, isReferenceType } = Services.Validation;
 
 /**
  * @param {Array} objects
@@ -170,41 +170,36 @@ export function drawPrototypeLines(V, objectsInfoMap, node) {
     }
   });
 }
-export function groupObjectsByFrequency(V, objectsInfoMap) {
-  // group objects by number of references they have,and limit them to display only first 4 props
-  // This should be in separate file !!!
-  const grouped = V.reduce((accumulated, object) => {
-    const objectInfo = objectsInfoMap.get(object);
-    // const { numOfReferences, isShrinked, isDisplayed } = objectInfo;
-    // if (isDisplayed) {
-    //   const allObjectProps = Object.getOwnPropertyNames(object);
-    //   const displayedProps = pickValidProps(object, isShrinked ? 4 : null);
-    //   const notDisplayedProps = allObjectProps.filter(prop => !displayedProps.includes(prop));
+export function groupObjectsByFrequency(objects) {
+  const objectToFrequencyMap = new Map();
 
-    //   recursivelyHideObjects(object, notDisplayedProps);
-    //   for (const prop of displayedProps) {
-    //     if (isValidProp(object, prop) && isReferenceType(object[prop])) {
-    //       const objectInfo = getLastSymbolValue(object[prop]);
-    //       objectInfo.isDisplayed = true;
-    //     }
-    //   }
-    // }
-    const { numOfReferences } = objectInfo;
-    if (accumulated[numOfReferences]) {
-      accumulated[numOfReferences].push(object);
-    } else {
-      accumulated[numOfReferences] = [object];
+  const traverseObject = (object) => {
+    const objectsQueue = [object];
+    // debugger;
+    for (let i = 0; i < objectsQueue.length; i++) {
+      const currentObject = objectsQueue[i];
+      if (objectToFrequencyMap.has(currentObject)) {
+        continue;
+      }
+      objectToFrequencyMap.set(currentObject, 0);
+      const objectsPrototype = Object.getPrototypeOf(currentObject);
+      let counterToSet = 1;
+      if (objectToFrequencyMap.has(objectsPrototype)) {
+        counterToSet = objectToFrequencyMap.get(objectsPrototype) + 1;
+      }
+      objectToFrequencyMap.set(objectsPrototype, counterToSet);
+      const objectProperties = Object.getOwnPropertyNames(currentObject)
+        .filter(prop => (isValidProp(currentObject, prop) && isReferenceType(currentObject[prop])));
+      objectsQueue.push(...objectProperties.map(prop => currentObject[prop]));
     }
-    return accumulated;
-  }, {});
+  };
 
-  // i don't want to represent objects with only one reference all at one line
-  let oneReferenceObjects = [];
-  if (grouped[1]) {
-    oneReferenceObjects = grouped[1];
-    delete grouped[1];
+  for (let i = 0; i < objects.length; i++) {
+    const object = objects[i];
+    traverseObject(object);
   }
-  return { grouped, oneReferenceObjects };
+
+  return objectToFrequencyMap;
 }
 
 export function recursivelyHideObjects(object, props, objectsInfoMap) {

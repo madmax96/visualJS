@@ -1,3 +1,4 @@
-import * as validation from './validation';
+import * as Validation from './validation';
 
-export const Validation = validation;
+const Services = { Validation };
+export default Services;

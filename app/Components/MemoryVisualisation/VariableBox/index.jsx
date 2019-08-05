@@ -1,11 +1,11 @@
 import React, { useRef, useEffect } from 'react';
 import PropTypes from 'prop-types';
-import { Validation } from '../../../Shared/Services';
+import { Services } from '../../../Shared';
 import { Dot } from '../MemoryVisualisationUI';
 import Primitive from '../ValueTypes/PrimitiveTypes';
 import VarUI from './VariableBoxUI';
 
-const { isReferenceType } = Validation;
+const { isReferenceType } = Services.Validation;
 
 const VariableBox = ({ name, value, objectInfo }) => {
   const referenceDot = useRef();

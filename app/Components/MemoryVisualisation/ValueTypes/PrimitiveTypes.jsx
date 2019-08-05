@@ -1,12 +1,12 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 
-import { Validation } from '../../../Shared/Services';
+import { Services } from '../../../Shared';
 import {
   String, Number, Null, Undefined, Boolean,
 } from './PrimitiveTypesUI';
 
-const { isNull, isDef } = Validation;
+const { isNull, isDef } = Services.Validation;
 
 const typeComponents = {
   string: value => (
