@@ -1,3 +1,4 @@
+import _flatten from 'lodash/flatten';
 import { Services } from '../../Shared';
 
 const { isValidProp, isReferenceType } = Services.Validation;
@@ -60,24 +61,45 @@ export function replaceLetConst(code) {
 //     }
 //   });
 // }
-export function groupObjectsByFrequency(objects) {
+export function unwindAllObjects(objects) {
   const objectToFrequencyMap = new Map();
+  const objectsSortedByFrequency = [[]];
 
   const traverseObject = (object) => {
     const objectsStack = [object];
-    // debugger;
     while (objectsStack.length) {
       const currentObject = objectsStack.pop();
       if (objectToFrequencyMap.has(currentObject)) {
         continue;
       }
       objectToFrequencyMap.set(currentObject, 0);
+      objectsSortedByFrequency[0].push(currentObject);
       const objectsPrototype = Object.getPrototypeOf(currentObject);
-      let counterToSet = 1;
+      if (!objectsPrototype) return;
       if (objectToFrequencyMap.has(objectsPrototype)) {
-        counterToSet = objectToFrequencyMap.get(objectsPrototype) + 1;
+        const objectsPrototypeCount = objectToFrequencyMap.get(objectsPrototype);
+        const newCount = objectsPrototypeCount + 1;
+
+        objectsSortedByFrequency[objectsPrototypeCount] = objectsSortedByFrequency[objectsPrototypeCount]
+          .filter(obj => obj !== objectsPrototype); // removing element from old frequency array
+
+        if (objectsSortedByFrequency[newCount]) {
+          objectsSortedByFrequency[newCount].push(objectsPrototype);
+        } else {
+          objectsSortedByFrequency[newCount] = [objectsPrototype];
+        }
+        objectToFrequencyMap.set(objectsPrototype, newCount);
+      } else {
+        objectToFrequencyMap.set(objectsPrototype, 1);
+        objectsSortedByFrequency[0] = objectsSortedByFrequency[0]
+          .filter(obj => obj !== objectsPrototype);
+
+        if (objectsSortedByFrequency[1]) {
+          objectsSortedByFrequency[1].push(objectsPrototype);
+        } else {
+          objectsSortedByFrequency[1] = [objectsPrototype];
+        }
       }
-      objectToFrequencyMap.set(objectsPrototype, counterToSet);
       const objectProperties = Object.getOwnPropertyNames(currentObject)
         .filter(prop => (isValidProp(currentObject, prop) && isReferenceType(currentObject[prop])));
       objectsStack.push(...objectProperties.map(prop => currentObject[prop]));
@@ -88,6 +110,5 @@ export function groupObjectsByFrequency(objects) {
     const object = objects[i];
     traverseObject(object);
   }
-
-  return objectToFrequencyMap;
+  return _flatten(objectsSortedByFrequency.filter(arr => arr.length));
 }
