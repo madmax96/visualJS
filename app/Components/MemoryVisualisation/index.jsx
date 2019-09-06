@@ -26,6 +26,7 @@ const VisualisationSection = () => {
   const [errorState, setErrorState] = useState('');
   const [objToCoords, setObjToCoords] = useState(new Map());
   const [visualisedObjects, setVisualisedObjects] = useState([]);
+  const [update, forceUpdate] = useState(true);
   const [lines, setLines] = useState([]);
   // have state also for visualised Lines
   const sandboxEnvElement = useRef();
@@ -56,24 +57,12 @@ const VisualisationSection = () => {
 
       const allObjects = unwindAllObjects(referenceTypes
         .map(refType => refType.envVariableValue));
-
-      const toVisualise = allObjects.map(obj => (
-        <Box key={generateKey()} flexBasis="20%">
-          <ObjectNode
-            object={obj}
-            onRenderToDOM={
-                ({ object, coords }) => {
-                  objToCoords.set(obj, coords);
-                }
-              }
-          />
-        </Box>
-      ));
-      setVisualisedObjects(toVisualise);
+      setVisualisedObjects(allObjects);
     }
   }, [code]);
 
   useEffect(() => {
+    if (!visualisedObjects.length) return;
     const sandboxEnv = sandboxEnvElement.current.contentWindow;
     const { height } = memoryContainerElement.current.getBoundingClientRect();
     const SVGContainerNode = svgContainerElement.current;
@@ -103,18 +92,43 @@ const VisualisationSection = () => {
       }
     }
     setLines(referenceLines);
-  }, [visualisedObjects]);
+  }, [visualisedObjects, update]);
 
   return (
     <>
       <Box display="none">
         <iframe title="sandboxEnvElement" src="" ref={sandboxEnvElement} />
       </Box>
-      <Box display="flex" flexDirection="row" flexWrap="wrap" position="relative" ref={memoryContainerElement}>
+      <Box
+        display="flex"
+        flexDirection="row"
+        flexWrap="wrap"
+        position="relative"
+        ref={memoryContainerElement}
+      >
         <SvgContainer ref={svgContainerElement}>
           {lines}
         </SvgContainer>
-        {visualisedObjects}
+        {visualisedObjects.map(obj => (
+          <Box key={generateKey()} flexBasis="20%">
+            <ObjectNode
+              object={obj}
+              top={objToCoords.get(obj) && objToCoords.get(obj).objectCoords.y}
+              left={objToCoords.get(obj) && objToCoords.get(obj).objectCoords.x}
+              onRenderToDOM={
+                (coords) => {
+                  objToCoords.set(obj, coords);
+                }
+              }
+              onObjectDrag={
+                (coords) => {
+                  objToCoords.set(obj, coords);
+                  forceUpdate(!update);
+                }
+              }
+            />
+          </Box>
+        ))}
       </Box>
     </>
   );

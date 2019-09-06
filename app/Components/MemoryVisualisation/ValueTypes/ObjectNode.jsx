@@ -19,12 +19,14 @@ const objectTypes = {
   object: keyValuePairs => <Obj>{keyValuePairs}</Obj>,
   array: keyValuePairs => <Array>{keyValuePairs}</Array>,
 };
-const ObjectNode = ({ object, onRenderToDOM }) => {
+const ObjectNode = ({
+  object, onRenderToDOM, left, top,
+}) => {
   const referenceDot = useRef();
   const prototypeDot = useRef();
   const moveObjectDot = useRef();
   const objectRef = useRef();
-  const [{ left, top }, setObjectNodeCoords] = useState({ left: null, top: null });
+  const [{ leftState, topState }, setObjectNodeCoords] = useState({ leftState: left, topState: top });
   const validKeys = Object.getOwnPropertyNames(object).filter(prop => isValidProp(object, prop));
   const referenceProps = validKeys
     .filter(key => isReferenceType(object[key]))
@@ -34,6 +36,8 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
     }), {});
 
   const calculateDotsCoordinates = () => {
+    const { offsetLeft, offsetTop } = objectRef.current;
+    const objectCoords = { x: offsetLeft, y: offsetTop };
     const {
       offsetTop: protoY, offsetLeft: protoX, clientWidth, clientHeight,
     } = prototypeDot.current;
@@ -68,18 +72,14 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
       prototypeDotCoords,
       refDotCoords,
       referencePropsCoords,
+      objectCoords,
     };
   };
 
   useEffect(() => {
-    const coords = calculateDotsCoordinates();
-    const { offsetLeft, offsetTop } = objectRef.current;
-
-    onRenderToDOM({
-      object,
-      coords,
-    });
-    setObjectNodeCoords({ left: offsetLeft, top: offsetTop });
+    if (leftState != null && topState !== null) return;
+    onRenderToDOM(calculateDotsCoordinates());
+    // setObjectNodeCoords({ left: offsetLeft, top: offsetTop });
   }, []);
 
   const removeDragHandler = () => {
@@ -90,8 +90,12 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
   const setDragHandler = (e) => {
     e.preventDefault(); // to prevent selection of text
     window.onmousemove = (e) => {
-      setObjectNodeCoords({ left: e.pageX, top: e.pageY - 64 - 969 });
+      setObjectNodeCoords({ leftState: e.pageX, topState: e.pageY - 64 - 969 });
       // call passed function and provide new coords for all dots
+      // onRenderToDOM({
+      //   ...calculateDotsCoordinates(),
+      //   objectCoords: { x: e.pageX, y: e.pageY - 64 - 969 },
+      // });
     };
     window.onmouseup = removeDragHandler;
   };
@@ -113,9 +117,9 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
   return (
     <Box
       ref={objectRef}
-      left={`${left}px`}
-      top={`${top}px`}
-      // position={(left !== null && top !== null) ? 'absolute' : 'unset'}
+      left={`${leftState}px`}
+      top={`${topState}px`}
+      position={(leftState != null && topState != null) ? 'absolute' : 'unset'}
     >
       <ThumbUpRounded
         ref={moveObjectDot}
@@ -126,7 +130,7 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
         {objectTypes[type](pairs)}
       </div>
 
-      <Box display="flex" justifyContent="center">
+      <Box>
         <Dot reference mr={5} ref={referenceDot} />
         <Dot ref={prototypeDot} onClick={() => {}} />
       </Box>
@@ -137,6 +141,7 @@ const ObjectNode = ({ object, onRenderToDOM }) => {
 ObjectNode.propTypes = {
   object: PropTypes.any.isRequired,
   onRenderToDOM: PropTypes.func.isRequired,
+  position: PropTypes.string,
 };
 
 export default ObjectNode;
